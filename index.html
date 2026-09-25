@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tablero Licitaciones - Defensa</title>
+    <!-- Tailwind CSS para el diseño rápido -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js para los gráficos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-50 p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-slate-800">Panel Logístico: Compras de Defensa (2016 - 2026)</h1>
+            <p class="text-slate-500 mt-2">Monitoreo de expedientes, tiempos y proveedores estratégicos.</p>
+        </header>
+
+        <!-- Bloque de Error (Oculto por defecto) -->
+        <div id="error-message" class="hidden bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded shadow-sm mb-6" role="alert">
+            <strong class="font-bold">Error de conexión:</strong>
+            <span class="block sm:inline" id="error-text">No se pudo cargar el archivo de datos.</span>
+        </div>
+
+        <!-- Pantalla de Carga (Spinner) -->
+        <div id="loading-state" class="flex flex-col items-center justify-center py-24">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-700 mb-4"></div>
+            <p class="text-slate-600 text-lg font-medium">Parseando JSON y calculando métricas...</p>
+        </div>
+
+        <!-- Contenido del Panel (Oculto hasta que carguen los datos) -->
+        <div id="dashboard-content" class="hidden">
+            
+            <!-- Tarjetas de KPIs -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100 border-t-4 border-t-blue-600">
+                    <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Volumen Adjudicado (ARS)</h3>
+                    <p class="text-2xl font-bold text-slate-800 mt-2" id="kpi-volumen">-</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100 border-t-4 border-t-emerald-500">
+                    <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Total de Expedientes</h3>
+                    <p class="text-2xl font-bold text-slate-800 mt-2" id="kpi-expedientes">-</p>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6 border border-slate-100 border-t-4 border-t-amber-500">
+                    <h3 class="text-slate-400 text-xs font-bold uppercase tracking-wider">Fuerza con Mayor Gasto</h3>
+                    <p class="text-2xl font-bold text-slate-800 mt-2" id="kpi-top-fuerza">-</p>
+                </div>
+            </div>
+
+            <!-- Gráficos -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-semibold text-slate-700 mb-6">Distribución Histórica por Fuerza</h3>
+                    <div class="relative h-64">
+                        <canvas id="chartFuerzas"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
+                    <h3 class="text-lg font-semibold text-slate-700 mb-6">Top 5 Proveedores (Concentración)</h3>
+                    <div class="relative h-64">
+                        <canvas id="chartProveedores"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Petición del archivo generado por PowerShell
+                const response = await fetch('datos_tablero.json');
+                if (!response.ok) throw new Error(`Error HTTP: ${response.status}`);
+                
+                const data = await response.json();
+                if (!data || data.length === 0) throw new Error("El JSON se descargó pero está vacío.");
+
+                procesarDatos(data);
+                
+                // Transición UX: Ocultar carga y mostrar dashboard
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('dashboard-content').classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Falla en la carga:", error);
+                document.getElementById('loading-state').classList.add('hidden');
+                const errorBox = document.getElementById('error-message');
+                errorBox.classList.remove('hidden');
+                document.getElementById('error-text').innerText = "Fallo la descarga del archivo 'datos_tablero.json'. Asegurate de tener levantado el servidor (ej: python -m http.server 8000).";
+            }
+        });
+
+        function procesarDatos(data) {
+            // Filtrar solo montos operados en Pesos para estandarizar el cálculo base
+            const dataPesos = data.filter(d => d.Moneda && d.Moneda.toLowerCase().includes('peso'));
+            
+            // Cálculos para KPIs
+            const volumenTotal = dataPesos.reduce((acc, curr) => acc + curr.Monto, 0);
+            document.getElementById('kpi-volumen').innerText = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 }).format(volumenTotal);
+            document.getElementById('kpi-expedientes').innerText = data.length.toLocaleString('es-AR');
+
+            const porFuerza = {};
+            const porProveedor = {};
+
+            dataPesos.forEach(d => {
+                // Diccionario de SAF
+                const fuerzaMap = { "371": "EMCO", "374": "Ejército", "379": "Armada", "381": "Fuerza Aérea" };
+                const fuerza = fuerzaMap[d.SAF] || "Otro SAF";
+                
+                porFuerza[fuerza] = (porFuerza[fuerza] || 0) + d.Monto;
+                
+                if (d.Proveedor && d.Proveedor.trim() !== "") {
+                    porProveedor[d.Proveedor] = (porProveedor[d.Proveedor] || 0) + d.Monto;
+                }
+            });
+
+            // Determinar la Fuerza top
+            const topFuerza = Object.keys(porFuerza).reduce((a, b) => porFuerza[a] > porFuerza[b] ? a : b);
+            document.getElementById('kpi-top-fuerza').innerText = topFuerza;
+
+            // Renderizado Chart.js - Doughnut
+            new Chart(document.getElementById('chartFuerzas'), {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(porFuerza),
+                    datasets: [{
+                        data: Object.values(porFuerza),
+                        backgroundColor: ['#2563eb', '#059669', '#d97706', '#4f46e5'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Renderizado Chart.js - Barras Horizontales
+            const topProveedores = Object.entries(porProveedor).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            new Chart(document.getElementById('chartProveedores'), {
+                type: 'bar',
+                data: {
+                    labels: topProveedores.map(p => p[0].substring(0, 20) + '...'),
+                    datasets: [{
+                        label: 'Adjudicado (ARS)',
+                        data: topProveedores.map(p => p[1]),
+                        backgroundColor: '#3b82f6',
+                        borderRadius: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y'
+                }
+            });
+        }
+    </script>
+</body>
+</html>
