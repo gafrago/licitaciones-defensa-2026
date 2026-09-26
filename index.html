@@ -149,7 +149,7 @@
                 </div>
             </section>
 
-            <!-- NUEVO: Análisis de Estacionalidad y Rubros (Treemap + Heatmap) -->
+            <!-- Análisis de Estacionalidad y Rubros (Treemap + Heatmap) -->
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Treemap de Rubros -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
@@ -160,11 +160,11 @@
                     <div id="treemap-chart" class="w-full h-72"></div>
                 </div>
 
-                <!-- Heatmap de Estacionalidad -->
+                <!-- Heatmap de Estacionalidad corregido -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <div class="mb-4">
                         <h3 class="text-base font-bold text-slate-800">Mapa de Calor Logístico (Latencia Anual)</h3>
-                        <p class="text-xs text-slate-500 mt-1">Intensidad del gasto por mes. Evidencia visual de la planificación y el "apuro" de fin de año.</p>
+                        <p class="text-xs text-slate-500 mt-1">Intensidad del gasto por mes con gradiente dinámico proporcional.</p>
                     </div>
                     <div id="heatmap-chart" class="w-full h-72"></div>
                 </div>
@@ -212,7 +212,7 @@
         let rawData = [];
         let chartFuerzasInst = null, chartProcInst = null;
         let networkInst = null;
-        let apexTreemap = null, apexHeatmap = null; // Instancias de ApexCharts
+        let apexTreemap = null, apexHeatmap = null;
 
         const safMap = { "371": "EMCO", "374": "Ejército", "379": "Armada", "381": "Fuerza Aérea" };
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
@@ -220,7 +220,6 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // Leer el nuevo archivo v3 que trae el dato "Mes"
                 const res = await fetch('datos_tablero_v3.json');
                 rawData = await res.json();
 
@@ -373,15 +372,14 @@
                 });
             }
 
-            // Renderear todos los gráficos
             renderGraficosChartJS(filtrados);
             renderNetworkGraph(filtrados);
-            renderApexCharts(filtrados); // Ejecuta Treemap y Heatmap
+            renderApexCharts(filtrados);
         }
 
-        // ---------- NUEVO: APEXCHARTS (TREEMAP Y HEATMAP) ----------
+        // ---------- APEXCHARTS CORREGIDO PARA GRADIENTE EN HEATMAP ----------
         function renderApexCharts(datos) {
-            // 1. Lógica del Treemap (Rubros)
+            // 1. Treemap
             const rubroTotales = {};
             datos.forEach(d => {
                 const r = d.Rubro || 'Otros';
@@ -405,7 +403,7 @@
             apexTreemap = new ApexCharts(document.querySelector("#treemap-chart"), optionsTreemap);
             apexTreemap.render();
 
-            // 2. Lógica del Heatmap (Estacionalidad por Fuerza)
+            // 2. Heatmap Corregido (Con colores proporcionales automáticos)
             const heatmapData = { "381": Array(12).fill(0), "374": Array(12).fill(0), "379": Array(12).fill(0), "371": Array(12).fill(0) };
             
             datos.forEach(d => {
@@ -424,19 +422,9 @@
             const optionsHeatmap = {
                 series: seriesHeatmap,
                 chart: { type: 'heatmap', height: 280, toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
-                plotOptions: {
-                    heatmap: {
-                        shadeIntensity: 0.5,
-                        colorScale: {
-                            ranges: [
-                                { from: 0, to: 0, color: '#f1f5f9', name: 'Sin gasto' },
-                                { from: 1, to: 10000000000, color: '#ef4444', name: 'Volumen' }
-                            ]
-                        }
-                    }
-                },
                 dataLabels: { enabled: false },
                 xaxis: { categories: mesesNombres },
+                colors: ["#3b82f6"], // Gradiente automático proporcional a los valores
                 tooltip: { y: { formatter: val => formatoMoneda.format(val) } }
             };
 
@@ -449,7 +437,6 @@
         function renderGraficosChartJS(datos) {
             Chart.defaults.font.family = "'Inter', sans-serif";
             
-            // Fuerzas
             const fuerzasTotales = {};
             datos.forEach(d => {
                 const f = safMap[d.SAF] || 'Otros';
@@ -469,7 +456,6 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
             });
 
-            // Procedimientos
             const procTotales = {};
             datos.forEach(d => { 
                 const proc = d.Procedimiento || 'N/A';
