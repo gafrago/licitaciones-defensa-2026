@@ -4,14 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitor de Compras Públicas - Sector Defensa</title>
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
+    <!-- Chart.js (Para tortas y barras simples) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Vis.js -->
+    <!-- Vis.js (Para Grafo de Redes) -->
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-    <!-- ApexCharts -->
+    <!-- ApexCharts (Para Heatmap y Treemap) -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <!-- PapaParse (Para leer CSV directo en el navegador) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     
     <style>
         #networkGraph { width: 100%; height: 100%; border-radius: 0.5rem; outline: none; background-color: #f8fafc; }
@@ -19,7 +22,6 @@
         .scrollbar-thin::-webkit-scrollbar { width: 6px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        /* Tooltip simple por CSS */
         .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; }
     </style>
 </head>
@@ -49,10 +51,32 @@
         <!-- Pantalla de Carga -->
         <div id="loading-state" class="flex flex-col items-center justify-center py-24">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-600 mb-4"></div>
-            <p class="text-slate-600 font-medium">Sintetizando ecosistema logístico y cargando modelos matemáticos...</p>
+            <p class="text-slate-600 font-medium">Leyendo y procesando base de datos oficial (CSV)...</p>
         </div>
 
         <div id="dashboard-content" class="hidden space-y-6">
+
+            <!-- Panel de Data Storytelling (Hallazgos Clave) -->
+            <section class="bg-gradient-to-r from-blue-900 to-slate-900 text-white p-6 rounded-xl shadow-md border border-blue-800">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="bg-blue-500 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Data Storytelling</span>
+                    <h3 class="text-base font-bold">Tres Hallazgos Clave del Período (2016-2026)</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-blue-100">
+                    <div class="bg-blue-950/60 p-3.5 rounded-lg border border-blue-700/50">
+                        <strong class="text-white block mb-1 font-semibold">1. Concentración de Proveedores</strong>
+                        El análisis estructural muestra alta dependencia en rubros críticos de mantenimiento y tecnología, concentrando los mayores flujos en un número reducido de contratistas.
+                    </div>
+                    <div class="bg-blue-950/60 p-3.5 rounded-lg border border-blue-700/50">
+                        <strong class="text-white block mb-1 font-semibold">2. Estacionalidad de Cierre Fiscal</strong>
+                        El mapa de calor evidencia incrementos marcados en la ejecución de compras hacia el tramo final de los años fiscales, reflejando el patrón histórico de gestión presupuestaria estatal.
+                    </div>
+                    <div class="bg-blue-950/60 p-3.5 rounded-lg border border-blue-700/50">
+                        <strong class="text-white block mb-1 font-semibold">3. Tasa de Contratación Directa</strong>
+                        Las modalidades excepcionales se concentran en partidas de urgencia logística, las cuales son monitoreadas automáticamente por nuestra matriz de alertas de riesgo.
+                    </div>
+                </div>
+            </section>
 
             <!-- Barra de Filtros -->
             <section class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
@@ -90,28 +114,6 @@
                 </div>
             </section>
 
-            <!-- MEJORA 2: PANEL DE DATA STORYtelling (Hallazgos Clave) -->
-            <section class="bg-gradient-to-r from-blue-900 to-slate-900 text-white p-6 rounded-xl shadow-md border border-blue-800">
-                <div class="flex items-center gap-2 mb-3">
-                    <span class="bg-blue-500 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Data Storytelling</span>
-                    <h3 class="text-base font-bold">Tres Hallazgos Clave del Período (2016-2026)</h3>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-blue-100">
-                    <div class="bg-blue-950/60 p-3.5 rounded-lg border border-blue-700/50">
-                        <strong class="text-white block mb-1 font-semibold">1. Concentración de Proveedores</strong>
-                        El análisis estructural muestra alta dependencia en rubros críticos de mantenimiento y tecnología, concentrando los mayores flujos en un número reducido de contratistas.
-                    </div>
-                    <div class="bg-blue-950/60 p-3.5 rounded-lg border border-blue-700/50">
-                        <strong class="text-white block mb-1 font-semibold">2. Estacionalidad de Cierre Fiscal</strong>
-                        El mapa de calor evidencia incrementos marcados en la ejecución de compras hacia el tramo final de los años fiscales, reflejando el patrón histórico de gestión presupuestaria estatal.
-                    </div>
-                    <div class="bg-blue-950/60 p-3.5 rounded-lg border border-blue-700/50">
-                        <strong class="text-white block mb-1 font-semibold">3. Tasa de Contratación Directa</strong>
-                        Las modalidades excepcionales se concentran en partidas de urgencia logística, las cuales son monitoreadas automáticamente por nuestra matriz de alertas de riesgo.
-                    </div>
-                </div>
-            </section>
-
             <!-- Tarjetas de KPIs -->
             <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-blue-600 shadow-sm">
@@ -125,15 +127,14 @@
                     <p class="text-xs text-slate-400 mt-1">Procesos finalizados</p>
                 </div>
                 
-                <!-- MEJORA 3: KPI HHI con Explicabilidad / Tooltip -->
+                <!-- KPI HHI -->
                 <div id="card-hhi" class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm transition-colors relative">
                     <div class="flex justify-between items-center">
                         <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Riesgo Logístico (HHI)</p>
-                        <!-- Icono de Ayuda / Tooltip -->
                         <div class="relative group cursor-pointer">
                             <span class="bg-slate-100 text-slate-600 font-bold px-1.5 py-0.5 rounded-full text-[10px] border border-slate-300">?</span>
                             <div class="absolute bottom-full right-0 mb-2 w-56 p-2 bg-slate-900 text-white text-[11px] rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
-                                <b>Índice HHI:</b> Mide monopolio. Menos de 1500 = Competitivo. Más de 2500 = Alta concentración en pocos proveedores.
+                                <b>Índice HHI:</b> Mide concentración. Menos de 1500 = Mercado Competitivo. Más de 2500 = Riesgo de alta dependencia de pocos proveedores.
                             </div>
                         </div>
                     </div>
@@ -156,7 +157,7 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                             Matriz de Banderas Rojas (Red Flags)
                         </h3>
-                        <p class="text-xs text-red-600 mt-1">Expedientes que cumplen triple condición de riesgo: Contratación Directa + Top 10% de monto más caro + Proveedor Recurrente.</p>
+                        <p class="text-xs text-red-600 mt-1">Expedientes que cumplen triple condición de riesgo: Contratación Directa/Privada + Monto superior al 90% (Top 10% más caro) + Proveedor con adjudicaciones múltiples.</p>
                     </div>
                     <div class="text-right">
                         <span class="text-sm font-bold text-red-700 bg-red-100 px-3 py-1 rounded-full border border-red-200" id="badge-alertas">0 Alertas</span>
@@ -183,7 +184,6 @@
 
             <!-- Análisis de Estacionalidad y Rubros (Treemap + Heatmap) -->
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Treemap de Rubros -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <div class="mb-4">
                         <h3 class="text-base font-bold text-slate-800">Cajas de Gasto por Rubro (Treemap)</h3>
@@ -192,7 +192,6 @@
                     <div id="treemap-chart" class="w-full h-72"></div>
                 </div>
 
-                <!-- Heatmap de Estacionalidad -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <div class="mb-4">
                         <h3 class="text-base font-bold text-slate-800">Mapa de Calor Logístico (Latencia Anual)</h3>
@@ -233,13 +232,13 @@
         </div>
     </main>
 
-    <!-- MEJORA 1: NOTA METODOLÓGICA AMPLIADA SOBRE INFLACIÓN Y VALORES NOMINALES -->
+    <!-- Nota Metodológica -->
     <footer class="bg-slate-900 border-t border-slate-800 text-slate-400 text-xs py-8 mt-8">
         <div class="max-w-7xl mx-auto px-4 space-y-4">
             <div class="border-b border-slate-800 pb-4">
                 <h4 class="text-white font-bold uppercase tracking-wider mb-1">Nota Metodológica sobre Valores Nominales e Inflación</h4>
                 <p class="leading-relaxed text-slate-400">
-                    En cumplimiento de los estándares de transparencia analítica, se aclara que los montos plurianuales presentados en este monitor (2016-2026) se encuentran expresados en <strong>pesos argentinos a valores nominales históricos</strong> de sus respectivas adjudicaciones. Debido a la inexistencia en fuentes abiertas oficiales de un deflactor sectorial específico para la industria de la defensa, no se aplicó un ajuste por IPC general para evitar distorsiones en los contratos de bienes transables e insumos importados. El valor de este tablero radica en la <em>trazabilidad comparativa interinstitucional</em>, la <em>detección de concentración de mercado (HHI)</em> y la <em>auditoría de procedimientos</em>.
+                    En cumplimiento de los estándares de transparencia analítica, se aclara que los montos plurianuales presentados en este monitor (2016-2026) se encuentran expresados en <strong>pesos argentinos a valores nominales históricos</strong> de sus respectivas adjudicaciones. Debido a la inexistencia en fuentes abiertas oficiales de un deflactor sectorial específico para la industria de la defensa, no se aplicó un ajuste por IPC general para evitar distorsiones. El valor de este tablero radica en la <em>trazabilidad comparativa interinstitucional</em>, la <em>detección de concentración de mercado (HHI)</em> y la <em>auditoría de procedimientos</em> intra-anual.
                 </p>
             </div>
             <div class="text-center text-slate-500">
@@ -248,7 +247,7 @@
         </div>
     </footer>
 
-    <!-- Lógica JavaScript Principal -->
+    <!-- Lógica JavaScript Principal para parsear el CSV crudo -->
     <script>
         let rawData = [];
         let chartFuerzasInst = null, chartProcInst = null;
@@ -259,22 +258,76 @@
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         const formatoMoneda = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                const res = await fetch('datos_tablero_v3.json');
-                rawData = await res.json();
+        document.addEventListener('DOMContentLoaded', () => {
+            const csvUrl = 'defensa_compras_2016_2026.csv'; // Nombre de tu archivo CSV en GitHub
 
-                poblarSelectores(rawData);
-                registrarEventos();
-                actualizarTablero();
+            // Usar PapaParse para descargar y convertir el CSV en el navegador
+            Papa.parse(csvUrl, {
+                download: true,
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    try {
+                        const data = results.data;
+                        
+                        // Mapear los datos del CSV a la estructura que espera el tablero
+                        rawData = data.map(row => {
+                            // Limpieza básica y fallback de campos típicos de COMPR.AR
+                            let monto = String(row.Monto_Adjudicado || row.monto_adjudicado || row.Monto || 0);
+                            // Limpiar posibles comas o signos de pesos en el CSV original
+                            monto = monto.replace(/\$/g, '').replace(/,/g, '');
+                            
+                            // Extraer mes de fechas típicas de COMPR.AR (ej. YYYY-MM-DD o DD/MM/YYYY)
+                            let mes = 1;
+                            let fecha = row.Fecha_de_Adjudicacion || row.fecha_adjudicacion || row.fecha || '';
+                            if (fecha) {
+                                if (fecha.includes('-')) {
+                                    const partes = fecha.split('-');
+                                    if (partes[0].length === 4) mes = parseInt(partes[1]); // YYYY-MM-DD
+                                } else if (fecha.includes('/')) {
+                                    const partes = fecha.split('/');
+                                    mes = parseInt(partes[1]); // DD/MM/YYYY
+                                }
+                            }
+                            
+                            return {
+                                Proceso: row.Numero_Proceso || row.numero_proceso || row.Proceso || "Sin ID",
+                                SAF: String(row.SAF || row.saf || "000"),
+                                Procedimiento: row.Tipo_de_Procedimiento || row.tipo_procedimiento || row.Procedimiento || "Otros",
+                                Ejercicio: String(row.Ejercicio || row.ejercicio || "2020"),
+                                Mes: !isNaN(mes) ? mes : 1,
+                                Proveedor: row.Proveedor || row.proveedor || row.Adjudicatario || "No Informado",
+                                Rubro: row.Rubro || row.rubro || row.Clase || "Bienes y Servicios Varios",
+                                Monto: parseFloat(monto) || 0
+                            };
+                        });
 
-                document.getElementById('loading-state').classList.add('hidden');
-                document.getElementById('dashboard-content').classList.remove('hidden');
-            } catch (e) {
-                console.error(e);
-                document.getElementById('loading-state').innerHTML = `<p class="text-red-600 font-bold">Error al cargar 'datos_tablero_v3.json'.</p>`;
-            }
+                        poblarSelectores(rawData);
+                        registrarEventos();
+                        actualizarTablero();
+
+                        document.getElementById('loading-state').classList.add('hidden');
+                        document.getElementById('dashboard-content').classList.remove('hidden');
+
+                    } catch (e) {
+                        console.error("Error al procesar el CSV:", e);
+                        mostrarErrorCSV();
+                    }
+                },
+                error: function(err) {
+                    console.error("Error de descarga PapaParse:", err);
+                    mostrarErrorCSV();
+                }
+            });
         });
+
+        function mostrarErrorCSV() {
+            document.getElementById('loading-state').innerHTML = `
+                <div class="bg-red-50 p-6 rounded-lg border border-red-200 text-center max-w-md">
+                    <h3 class="text-red-700 font-bold text-lg mb-2">Error de conexión con el archivo CSV</h3>
+                    <p class="text-red-600 text-sm">No se pudo localizar el archivo <strong>defensa_compras_2016_2026.csv</strong> en tu repositorio. Asegurate de que el archivo esté subido en la misma carpeta que este index.html y respete las mayúsculas/minúsculas del nombre.</p>
+                </div>`;
+        }
 
         function poblarSelectores(datos) {
             const ejSelect = document.getElementById('filtro-ejercicio');
@@ -331,10 +384,9 @@
             const provTotales = {};
             const provFrecuencia = {};
             filtrados.forEach(d => {
-                if(d.Proveedor) {
-                    provTotales[d.Proveedor] = (provTotales[d.Proveedor] || 0) + Number(d.Monto);
-                    provFrecuencia[d.Proveedor] = (provFrecuencia[d.Proveedor] || 0) + 1;
-                }
+                const provName = d.Proveedor.trim() === '' ? 'No Informado' : d.Proveedor;
+                provTotales[provName] = (provTotales[provName] || 0) + Number(d.Monto);
+                provFrecuencia[provName] = (provFrecuencia[provName] || 0) + 1;
             });
 
             const topProv = Object.entries(provTotales).sort((a,b) => b[1]-a[1])[0];
@@ -377,9 +429,10 @@
 
             const alertas = filtrados.filter(d => {
                 const procStr = (d.Procedimiento || '').toLowerCase();
-                const esDirecta = procStr.includes('directa') || procStr.includes('privada');
-                const montoAlto = Number(d.Monto) >= umbralCritico;
-                const proveedorRecurrente = provFrecuencia[d.Proveedor] > 3;
+                const esDirecta = procStr.includes('directa') || procStr.includes('privada') || procStr.includes('excepción');
+                const montoAlto = Number(d.Monto) >= umbralCritico && Number(d.Monto) > 0;
+                const provName = d.Proveedor.trim() === '' ? 'No Informado' : d.Proveedor;
+                const proveedorRecurrente = provFrecuencia[provName] > 3;
 
                 return esDirecta && montoAlto && proveedorRecurrente;
             });
@@ -405,7 +458,7 @@
                     tr.className = "hover:bg-red-50/50 transition-colors";
                     tr.innerHTML = `
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 border-l-4 border-l-red-500">${a.Proceso}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-semibold">${a.Proveedor}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-semibold">${a.Proveedor || 'No Informado'}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-red-700 font-bold">${formatoMoneda.format(a.Monto)}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${a.Ejercicio}</td>
                     `;
@@ -423,7 +476,7 @@
             // 1. Treemap
             const rubroTotales = {};
             datos.forEach(d => {
-                const r = d.Rubro || 'Otros';
+                const r = d.Rubro && d.Rubro.trim() !== '' ? d.Rubro : 'Bienes y Servicios Múltiples';
                 rubroTotales[r] = (rubroTotales[r] || 0) + Number(d.Monto);
             });
             const seriesTreemap = Object.entries(rubroTotales).map(([x, y]) => ({ x, y }));
@@ -441,15 +494,18 @@
             };
 
             if (apexTreemap) { apexTreemap.destroy(); }
-            apexTreemap = new ApexCharts(document.querySelector("#treemap-chart"), optionsTreemap);
-            apexTreemap.render();
+            if (seriesTreemap.length > 0) {
+                apexTreemap = new ApexCharts(document.querySelector("#treemap-chart"), optionsTreemap);
+                apexTreemap.render();
+            }
 
             // 2. Heatmap Dinámico
             const heatmapData = { "381": Array(12).fill(0), "374": Array(12).fill(0), "379": Array(12).fill(0), "371": Array(12).fill(0) };
             
             datos.forEach(d => {
-                if(d.SAF && d.Mes >= 1 && d.Mes <= 12) {
-                    heatmapData[d.SAF][d.Mes - 1] += Number(d.Monto);
+                const fuerza_id = Object.keys(safMap).find(key => safMap[key] === d.SAF) || d.SAF;
+                if(heatmapData[fuerza_id] && d.Mes >= 1 && d.Mes <= 12) {
+                    heatmapData[fuerza_id][d.Mes - 1] += Number(d.Monto);
                 }
             });
 
@@ -465,7 +521,7 @@
                 chart: { type: 'heatmap', height: 280, toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
                 dataLabels: { enabled: false },
                 xaxis: { categories: mesesNombres },
-                colors: ["#3b82f6"], // Gradiente automático proporcional
+                colors: ["#3b82f6"], 
                 tooltip: { y: { formatter: val => formatoMoneda.format(val) } }
             };
 
@@ -480,7 +536,7 @@
             
             const fuerzasTotales = {};
             datos.forEach(d => {
-                const f = safMap[d.SAF] || 'Otros';
+                const f = safMap[d.SAF] || `SAF ${d.SAF}`;
                 fuerzasTotales[f] = (fuerzasTotales[f] || 0) + Number(d.Monto);
             });
             if(chartFuerzasInst) chartFuerzasInst.destroy();
@@ -528,14 +584,15 @@
             const provTotales = {};
 
             datos.forEach(d => {
-                if(!d.Proveedor) return;
+                const provName = d.Proveedor && d.Proveedor.trim() !== '' ? d.Proveedor : 'No Informado';
+                if(provName === 'No Informado') return;
+
                 const fuerza = safMap[d.SAF] || `SAF ${d.SAF}`;
-                const prov = d.Proveedor;
                 const monto = Number(d.Monto) || 0;
                 
-                const key = `${fuerza}|${prov}`;
+                const key = `${fuerza}|${provName}`;
                 edgesMap[key] = (edgesMap[key] || 0) + monto;
-                provTotales[prov] = (provTotales[prov] || 0) + monto;
+                provTotales[provName] = (provTotales[provName] || 0) + monto;
             });
 
             const top15Prov = Object.entries(provTotales).sort((a,b) => b[1]-a[1]).slice(0, 15).map(p => p[0]);
