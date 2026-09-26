@@ -259,48 +259,65 @@
         const formatoMoneda = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
 
         document.addEventListener('DOMContentLoaded', () => {
-            const csvUrl = 'defensa_compras_2016_2026.csv'; // Nombre de tu archivo CSV en GitHub
+            const csvUrl = 'defensa_compras_2016_2026.csv'; // Asegurate de que tu archivo se llame exactamente así
 
-            // Usar PapaParse para descargar y convertir el CSV en el navegador
             Papa.parse(csvUrl, {
                 download: true,
                 header: true,
                 skipEmptyLines: true,
                 complete: function(results) {
                     try {
-                        const data = results.data;
+                        // 1. Normalizar todas las columnas a minúsculas para que no haya errores
+                        const data = results.data.map(row => {
+                            let newRow = {};
+                            for (let key in row) {
+                                newRow[key.trim().toLowerCase()] = row[key];
+                            }
+                            return newRow;
+                        });
                         
-                        // Mapear los datos del CSV a la estructura que espera el tablero
+                        // 2. Mapear los datos reales a la estructura del tablero
                         rawData = data.map(row => {
-                            // Limpieza básica y fallback de campos típicos de COMPR.AR
-                            let monto = String(row.Monto_Adjudicado || row.monto_adjudicado || row.Monto || 0);
-                            // Limpiar posibles comas o signos de pesos en el CSV original
-                            monto = monto.replace(/\$/g, '').replace(/,/g, '');
+                            // Convertir formato de moneda Argentina a formato programación
+                            let montoCrudo = String(row.monto_adjudicado || row.monto || row.precio_total || "0");
+                            montoCrudo = montoCrudo.replace(/\$|\s/g, ''); // Saca signos $ y espacios
+                            if (montoCrudo.includes('.') && montoCrudo.includes(',')) {
+                                montoCrudo = montoCrudo.replace(/\./g, '').replace(',', '.'); // Ej: 1.500,50 -> 1500.50
+                            } else if (montoCrudo.includes(',')) {
+                                montoCrudo = montoCrudo.replace(',', '.'); // Ej: 1500,50 -> 1500.50
+                            }
                             
-                            // Extraer mes de fechas típicas de COMPR.AR (ej. YYYY-MM-DD o DD/MM/YYYY)
+                            // Extraer el mes
                             let mes = 1;
-                            let fecha = row.Fecha_de_Adjudicacion || row.fecha_adjudicacion || row.fecha || '';
+                            let fecha = row.fecha_adjudicacion || row.fecha_de_adjudicacion || row.fecha || '';
                             if (fecha) {
                                 if (fecha.includes('-')) {
                                     const partes = fecha.split('-');
-                                    if (partes[0].length === 4) mes = parseInt(partes[1]); // YYYY-MM-DD
+                                    if (partes[0].length === 4) mes = parseInt(partes[1]);
                                 } else if (fecha.includes('/')) {
                                     const partes = fecha.split('/');
-                                    mes = parseInt(partes[1]); // DD/MM/YYYY
+                                    mes = parseInt(partes[1]);
                                 }
                             }
                             
                             return {
-                                Proceso: row.Numero_Proceso || row.numero_proceso || row.Proceso || "Sin ID",
-                                SAF: String(row.SAF || row.saf || "000"),
-                                Procedimiento: row.Tipo_de_Procedimiento || row.tipo_procedimiento || row.Procedimiento || "Otros",
-                                Ejercicio: String(row.Ejercicio || row.ejercicio || "2020"),
+                                Proceso: row.numero_proceso || row.proceso || "Sin ID",
+                                SAF: String(row.saf || "000"),
+                                Procedimiento: row.tipo_de_procedimiento || row.tipo_procedimiento || row.procedimiento || "Otros",
+                                Ejercicio: String(row.ejercicio || row.anio || "2020"),
                                 Mes: !isNaN(mes) ? mes : 1,
-                                Proveedor: row.Proveedor || row.proveedor || row.Adjudicatario || "No Informado",
-                                Rubro: row.Rubro || row.rubro || row.Clase || "Bienes y Servicios Varios",
-                                Monto: parseFloat(monto) || 0
+                                Proveedor: row.proveedor || row.adjudicatario || row.razon_social || "No Informado",
+                                Rubro: row.rubro || row.clase || row.descripcion || "Logística General",
+                                Monto: parseFloat(montoCrudo) || 0
                             };
                         });
+
+                        // 3. Quitar filas con monto 0 o errores de lectura
+                        rawData = rawData.filter(d => d.Monto > 0);
+
+                        if (rawData.length === 0) {
+                            throw new Error("El archivo CSV se leyó, pero no se detectaron montos válidos.");
+                        }
 
                         poblarSelectores(rawData);
                         registrarEventos();
@@ -311,21 +328,22 @@
 
                     } catch (e) {
                         console.error("Error al procesar el CSV:", e);
-                        mostrarErrorCSV();
+                        mostrarErrorCSV(e.message);
                     }
                 },
                 error: function(err) {
                     console.error("Error de descarga PapaParse:", err);
-                    mostrarErrorCSV();
+                    mostrarErrorCSV("No se encontró el archivo CSV en el servidor.");
                 }
             });
         });
 
-        function mostrarErrorCSV() {
+        function mostrarErrorCSV(mensajeExtra = "") {
             document.getElementById('loading-state').innerHTML = `
                 <div class="bg-red-50 p-6 rounded-lg border border-red-200 text-center max-w-md">
-                    <h3 class="text-red-700 font-bold text-lg mb-2">Error de conexión con el archivo CSV</h3>
-                    <p class="text-red-600 text-sm">No se pudo localizar el archivo <strong>defensa_compras_2016_2026.csv</strong> en tu repositorio. Asegurate de que el archivo esté subido en la misma carpeta que este index.html y respete las mayúsculas/minúsculas del nombre.</p>
+                    <h3 class="text-red-700 font-bold text-lg mb-2">Error de conexión de datos</h3>
+                    <p class="text-red-600 text-sm">No se pudo procesar el archivo <strong>defensa_compras_2016_2026.csv</strong>.</p>
+                    <p class="text-red-500 text-xs mt-2">${mensajeExtra}</p>
                 </div>`;
         }
 
@@ -384,9 +402,11 @@
             const provTotales = {};
             const provFrecuencia = {};
             filtrados.forEach(d => {
-                const provName = d.Proveedor.trim() === '' ? 'No Informado' : d.Proveedor;
-                provTotales[provName] = (provTotales[provName] || 0) + Number(d.Monto);
-                provFrecuencia[provName] = (provFrecuencia[provName] || 0) + 1;
+                const provName = (d.Proveedor && d.Proveedor.trim() !== '') ? d.Proveedor : 'No Informado';
+                if(provName !== 'No Informado') {
+                    provTotales[provName] = (provTotales[provName] || 0) + Number(d.Monto);
+                    provFrecuencia[provName] = (provFrecuencia[provName] || 0) + 1;
+                }
             });
 
             const topProv = Object.entries(provTotales).sort((a,b) => b[1]-a[1])[0];
@@ -431,10 +451,10 @@
                 const procStr = (d.Procedimiento || '').toLowerCase();
                 const esDirecta = procStr.includes('directa') || procStr.includes('privada') || procStr.includes('excepción');
                 const montoAlto = Number(d.Monto) >= umbralCritico && Number(d.Monto) > 0;
-                const provName = d.Proveedor.trim() === '' ? 'No Informado' : d.Proveedor;
+                const provName = (d.Proveedor && d.Proveedor.trim() !== '') ? d.Proveedor : 'No Informado';
                 const proveedorRecurrente = provFrecuencia[provName] > 3;
 
-                return esDirecta && montoAlto && proveedorRecurrente;
+                return esDirecta && montoAlto && proveedorRecurrente && provName !== 'No Informado';
             });
 
             alertas.sort((a, b) => Number(b.Monto) - Number(a.Monto));
@@ -458,7 +478,7 @@
                     tr.className = "hover:bg-red-50/50 transition-colors";
                     tr.innerHTML = `
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 border-l-4 border-l-red-500">${a.Proceso}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-semibold">${a.Proveedor || 'No Informado'}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-semibold">${a.Proveedor}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-red-700 font-bold">${formatoMoneda.format(a.Monto)}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${a.Ejercicio}</td>
                     `;
@@ -476,7 +496,7 @@
             // 1. Treemap
             const rubroTotales = {};
             datos.forEach(d => {
-                const r = d.Rubro && d.Rubro.trim() !== '' ? d.Rubro : 'Bienes y Servicios Múltiples';
+                const r = (d.Rubro && d.Rubro.trim() !== '') ? d.Rubro : 'Logística General';
                 rubroTotales[r] = (rubroTotales[r] || 0) + Number(d.Monto);
             });
             const seriesTreemap = Object.entries(rubroTotales).map(([x, y]) => ({ x, y }));
@@ -536,7 +556,7 @@
             
             const fuerzasTotales = {};
             datos.forEach(d => {
-                const f = safMap[d.SAF] || `SAF ${d.SAF}`;
+                const f = safMap[d.SAF] || 'Otros';
                 fuerzasTotales[f] = (fuerzasTotales[f] || 0) + Number(d.Monto);
             });
             if(chartFuerzasInst) chartFuerzasInst.destroy();
@@ -584,7 +604,7 @@
             const provTotales = {};
 
             datos.forEach(d => {
-                const provName = d.Proveedor && d.Proveedor.trim() !== '' ? d.Proveedor : 'No Informado';
+                const provName = (d.Proveedor && d.Proveedor.trim() !== '') ? d.Proveedor : 'No Informado';
                 if(provName === 'No Informado') return;
 
                 const fuerza = safMap[d.SAF] || `SAF ${d.SAF}`;
