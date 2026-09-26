@@ -6,14 +6,16 @@
     <title>Monitor de Compras Públicas - Sector Defensa</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
+    <!-- Chart.js (Para tortas y barras simples) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Vis.js para el Grafo de Red -->
+    <!-- Vis.js (Para Grafo de Redes) -->
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <!-- ApexCharts (Para Heatmap y Treemap) -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    
     <style>
         #networkGraph { width: 100%; height: 100%; border-radius: 0.5rem; outline: none; background-color: #f8fafc; }
         .vis-network:focus { outline: none; }
-        /* Scrollbar personalizado para la tabla de alertas */
         .scrollbar-thin::-webkit-scrollbar { width: 6px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
@@ -30,7 +32,7 @@
                         Contar con Datos 2026 • Exploración Interactiva
                     </div>
                     <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Monitor Logístico: Compras de Defensa</h1>
-                    <p class="text-slate-400 text-sm mt-1">Auditoría, medición de riesgo (HHI) y análisis estratégico de contrataciones.</p>
+                    <p class="text-slate-400 text-sm mt-1">Auditoría, inteligencia de datos (BI) y medición de riesgo estructural.</p>
                 </div>
                 <div class="flex flex-col items-start md:items-end text-xs text-slate-400">
                     <span class="bg-slate-800 px-3 py-1 rounded-md mb-1 border border-slate-700"><strong>Fuente:</strong> COMPR.AR / ONC</span>
@@ -45,7 +47,7 @@
         <!-- Pantalla de Carga -->
         <div id="loading-state" class="flex flex-col items-center justify-center py-24">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-600 mb-4"></div>
-            <p class="text-slate-600 font-medium">Procesando datos y calculando índices de mercado...</p>
+            <p class="text-slate-600 font-medium">Sintetizando ecosistema logístico y cargando modelos matemáticos...</p>
         </div>
 
         <div id="dashboard-content" class="hidden space-y-6">
@@ -54,7 +56,7 @@
             <section class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex flex-col sm:flex-row items-center justify-between pb-3 mb-4 border-b border-slate-100 gap-2">
                     <h2 class="text-sm font-bold uppercase tracking-wider text-slate-600 flex items-center gap-2">
-                        <span>Filtros Dinámicos</span>
+                        <span>Filtros Dinámicos de Auditoría</span>
                     </h2>
                     <button id="btn-reset" class="text-xs text-blue-600 hover:text-blue-800 font-bold transition bg-blue-50 px-3 py-1.5 rounded">
                         Restablecer filtros
@@ -99,7 +101,6 @@
                     <p class="text-xs text-slate-400 mt-1">Procesos finalizados</p>
                 </div>
                 
-                <!-- KPI HHI -->
                 <div id="card-hhi" class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm transition-colors">
                     <p class="text-xs font-bold uppercase tracking-wider text-slate-500 flex justify-between">
                         Riesgo Logístico (HHI)
@@ -115,7 +116,7 @@
                 </div>
             </section>
 
-            <!-- 1. Matriz de Banderas Rojas -->
+            <!-- Matriz de Banderas Rojas -->
             <section class="bg-white rounded-xl border border-red-200 shadow-sm overflow-hidden">
                 <div class="bg-red-50 border-b border-red-100 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
@@ -140,9 +141,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Año</th>
                             </tr>
                         </thead>
-                        <tbody id="tabla-alertas" class="bg-white divide-y divide-slate-100">
-                            <!-- Filas inyectadas por JS -->
-                        </tbody>
+                        <tbody id="tabla-alertas" class="bg-white divide-y divide-slate-100"></tbody>
                     </table>
                     <div id="msg-sin-alertas" class="p-8 text-center text-slate-500 text-sm hidden">
                         No se detectaron expedientes de alto riesgo con los filtros actuales.
@@ -150,80 +149,79 @@
                 </div>
             </section>
 
-            <!-- 2. Grafo de Redes -->
+            <!-- NUEVO: Análisis de Estacionalidad y Rubros (Treemap + Heatmap) -->
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Treemap de Rubros -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="mb-4">
+                        <h3 class="text-base font-bold text-slate-800">Cajas de Gasto por Rubro (Treemap)</h3>
+                        <p class="text-xs text-slate-500 mt-1">Magnitud del presupuesto ejecutado según categoría del insumo.</p>
+                    </div>
+                    <div id="treemap-chart" class="w-full h-72"></div>
+                </div>
+
+                <!-- Heatmap de Estacionalidad -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <div class="mb-4">
+                        <h3 class="text-base font-bold text-slate-800">Mapa de Calor Logístico (Latencia Anual)</h3>
+                        <p class="text-xs text-slate-500 mt-1">Intensidad del gasto por mes. Evidencia visual de la planificación y el "apuro" de fin de año.</p>
+                    </div>
+                    <div id="heatmap-chart" class="w-full h-72"></div>
+                </div>
+            </section>
+
+            <!-- Grafo de Redes -->
             <section class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-                <div class="mb-4">
-                    <h3 class="text-base font-bold text-slate-800">Ecosistema Interactivo de Proveedores (Network Graph)</h3>
-                    <p class="text-xs text-slate-500 mt-1">Nodos azules: Fuerzas. Nodos grises: Top Proveedores. El grosor de las líneas representa el volumen adjudicado. Arrastrá los nodos para aislar relaciones.</p>
+                <div class="mb-4 flex justify-between items-start">
+                    <div>
+                        <h3 class="text-base font-bold text-slate-800">Topología del Ecosistema de Proveedores (Network Graph)</h3>
+                        <p class="text-xs text-slate-500 mt-1">Nodos azules: Fuerzas Armadas. Nodos grises: Top 15 Proveedores (el tamaño indica el volumen facturado).</p>
+                    </div>
                 </div>
                 <div class="relative w-full border border-slate-200" style="height: 450px;">
                     <div id="networkGraph"></div>
                 </div>
             </section>
 
-            <!-- 3. Gráficos Originales Chart.js -->
-            <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Top 5 Proveedores (Barras) -->
+            <!-- Gráficos Base (Procedimientos) -->
+            <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="mb-4">
-                        <h3 class="text-base font-bold text-slate-800">Top 5 Proveedores Estratégicos</h3>
-                        <p class="text-xs text-slate-500 mt-1">Volumen monetario concentrado en los principales adjudicatarios.</p>
-                    </div>
-                    <div class="relative h-64 w-full">
-                        <canvas id="chartProveedores"></canvas>
-                    </div>
-                </div>
-
-                <!-- Rubros -->
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="mb-4">
-                        <h3 class="text-base font-bold text-slate-800">Ejecución Logística por Rubro</h3>
-                        <p class="text-xs text-slate-500 mt-1">Distribución del gasto en insumos operativos y de sostenimiento.</p>
-                    </div>
-                    <div class="relative h-64 w-full">
-                        <canvas id="chartRubros"></canvas>
-                    </div>
-                </div>
-
-                <!-- Fuerzas -->
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 class="text-base font-bold text-slate-800 mb-4">Fondos por Fuerza / Organismo</h3>
-                    <div class="relative h-56 w-full flex justify-center">
-                        <canvas id="chartFuerzas"></canvas>
-                    </div>
-                </div>
-
-                <!-- Procedimientos -->
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 class="text-base font-bold text-slate-800 mb-4">Monto por Modalidad de Contratación</h3>
+                    <h3 class="text-base font-bold text-slate-800 mb-4">Tasa de Modalidad de Contratación</h3>
                     <div class="relative h-56 w-full">
                         <canvas id="chartProcedimientos"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-bold text-slate-800 mb-4">Fondos por Fuerza (Volumen de Operaciones)</h3>
+                    <div class="relative h-56 w-full flex justify-center">
+                        <canvas id="chartFuerzas"></canvas>
                     </div>
                 </div>
             </section>
         </div>
     </main>
 
-    <!-- Footer -->
     <footer class="bg-slate-900 border-t border-slate-800 text-slate-500 text-xs py-6 mt-8">
         <div class="max-w-7xl mx-auto px-4 text-center">
             Plataforma desarrollada para el certamen nacional de visualización de datos abiertos <strong>Contar con Datos 2026</strong>.
         </div>
     </footer>
 
-    <!-- Lógica JavaScript -->
+    <!-- Lógica JavaScript Principal -->
     <script>
         let rawData = [];
-        let chartRubrosInst = null, chartFuerzasInst = null, chartProvInst = null, chartProcInst = null;
+        let chartFuerzasInst = null, chartProcInst = null;
         let networkInst = null;
+        let apexTreemap = null, apexHeatmap = null; // Instancias de ApexCharts
 
         const safMap = { "371": "EMCO", "374": "Ejército", "379": "Armada", "381": "Fuerza Aérea" };
+        const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         const formatoMoneda = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // Requiere datos_tablero_v2.json
-                const res = await fetch('datos_tablero_v2.json');
+                // Leer el nuevo archivo v3 que trae el dato "Mes"
+                const res = await fetch('datos_tablero_v3.json');
                 rawData = await res.json();
 
                 poblarSelectores(rawData);
@@ -234,7 +232,7 @@
                 document.getElementById('dashboard-content').classList.remove('hidden');
             } catch (e) {
                 console.error(e);
-                document.getElementById('loading-state').innerHTML = `<p class="text-red-600 font-bold">Error al cargar 'datos_tablero_v2.json'. Asegurate de haberlo subido a GitHub.</p>`;
+                document.getElementById('loading-state').innerHTML = `<p class="text-red-600 font-bold">Error al cargar 'datos_tablero_v3.json'.</p>`;
             }
         });
 
@@ -262,7 +260,6 @@
             });
         }
 
-        // Función matemática para Percentil (detectar el 10% más caro)
         function percentil(arr, p) {
             if (arr.length === 0) return 0;
             if (p <= 0) return arr[0];
@@ -280,7 +277,6 @@
             const fEj = document.getElementById('filtro-ejercicio').value;
             const fProc = document.getElementById('filtro-procedimiento').value;
 
-            // Filtro Maestro
             const filtrados = rawData.filter(d => 
                 (fFuerza === 'TODAS' || d.SAF === fFuerza) &&
                 (fEj === 'TODOS' || String(d.Ejercicio) === fEj) &&
@@ -292,7 +288,6 @@
             document.getElementById('kpi-volumen').textContent = formatoMoneda.format(totalMonto);
             document.getElementById('kpi-expedientes').textContent = filtrados.length.toLocaleString('es-AR');
 
-            // Diccionarios de Proveedores
             const provTotales = {};
             const provFrecuencia = {};
             filtrados.forEach(d => {
@@ -302,7 +297,6 @@
                 }
             });
 
-            // Mayor Contratista
             const topProv = Object.entries(provTotales).sort((a,b) => b[1]-a[1])[0];
             document.getElementById('kpi-proveedor').textContent = topProv ? topProv[0] : 'Sin datos';
             document.getElementById('kpi-proveedor-monto').textContent = topProv ? formatoMoneda.format(topProv[1]) : '$0';
@@ -325,7 +319,7 @@
                 hhiLabel.className = "text-xs font-semibold mt-1 px-2 py-0.5 inline-block rounded-md bg-slate-100 text-slate-600";
             } else if (hhi < 1500) {
                 cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm";
-                hhiLabel.textContent = "Competitivo (Bajo Riesgo)";
+                hhiLabel.textContent = "Bajo Riesgo (Competitivo)";
                 hhiLabel.className = "text-xs font-bold mt-1 px-2 py-0.5 inline-block rounded-md bg-emerald-100 text-emerald-800";
             } else if (hhi <= 2500) {
                 cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-yellow-400 shadow-sm";
@@ -333,11 +327,11 @@
                 hhiLabel.className = "text-xs font-bold mt-1 px-2 py-0.5 inline-block rounded-md bg-yellow-100 text-yellow-800";
             } else {
                 cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-red-600 shadow-sm";
-                hhiLabel.textContent = "Riesgo: Monopolio / Oligopolio";
+                hhiLabel.textContent = "Riesgo Alto (Monopolio)";
                 hhiLabel.className = "text-xs font-bold mt-1 px-2 py-0.5 inline-block rounded-md bg-red-100 text-red-800";
             }
 
-            // MATRIZ DE BANDERAS ROJAS
+            // RED FLAGS
             const montosArray = filtrados.map(d => Number(d.Monto)).sort((a, b) => a - b);
             const umbralCritico = percentil(montosArray, 0.90);
 
@@ -379,61 +373,83 @@
                 });
             }
 
-            // Render de todos los visuales
-            renderGraficosChartJS(filtrados, provTotales);
+            // Renderear todos los gráficos
+            renderGraficosChartJS(filtrados);
             renderNetworkGraph(filtrados);
+            renderApexCharts(filtrados); // Ejecuta Treemap y Heatmap
         }
 
-        function renderGraficosChartJS(datos, provTotales) {
-            Chart.defaults.font.family = "'Inter', sans-serif";
-            
-            // 1. Rubros
+        // ---------- NUEVO: APEXCHARTS (TREEMAP Y HEATMAP) ----------
+        function renderApexCharts(datos) {
+            // 1. Lógica del Treemap (Rubros)
             const rubroTotales = {};
             datos.forEach(d => {
                 const r = d.Rubro || 'Otros';
                 rubroTotales[r] = (rubroTotales[r] || 0) + Number(d.Monto);
             });
-            const topRubros = Object.entries(rubroTotales).sort((a,b) => b[1]-a[1]).slice(0, 6);
+            const seriesTreemap = Object.entries(rubroTotales).map(([x, y]) => ({ x, y }));
+
+            const optionsTreemap = {
+                series: [{ data: seriesTreemap }],
+                chart: { type: 'treemap', height: 280, toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
+                colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#64748b', '#ef4444'],
+                plotOptions: { treemap: { distributed: true, enableShades: false } },
+                dataLabels: {
+                    style: { fontSize: '11px', fontWeight: 600 },
+                    formatter: function(text, op) { return [text, '$' + (op.value / 1e6).toFixed(1) + 'M']; }
+                },
+                tooltip: { y: { formatter: val => formatoMoneda.format(val) } }
+            };
+
+            if (apexTreemap) { apexTreemap.destroy(); }
+            apexTreemap = new ApexCharts(document.querySelector("#treemap-chart"), optionsTreemap);
+            apexTreemap.render();
+
+            // 2. Lógica del Heatmap (Estacionalidad por Fuerza)
+            const heatmapData = { "381": Array(12).fill(0), "374": Array(12).fill(0), "379": Array(12).fill(0), "371": Array(12).fill(0) };
             
-            if(chartRubrosInst) chartRubrosInst.destroy();
-            chartRubrosInst = new Chart(document.getElementById('chartRubros'), {
-                type: 'bar',
-                data: {
-                    labels: topRubros.map(p => p[0]),
-                    datasets: [{
-                        data: topRubros.map(p => p[1]),
-                        backgroundColor: '#6366f1',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
-                    plugins: { legend: { display: false } },
-                    scales: { x: { ticks: { callback: v => '$' + (v/1e6).toFixed(0) + 'M' } } }
+            datos.forEach(d => {
+                if(d.SAF && d.Mes >= 1 && d.Mes <= 12) {
+                    heatmapData[d.SAF][d.Mes - 1] += Number(d.Monto);
                 }
             });
 
-            // 2. Top Proveedores
-            const topProv = Object.entries(provTotales).sort((a,b) => b[1]-a[1]).slice(0, 5);
-            if(chartProvInst) chartProvInst.destroy();
-            chartProvInst = new Chart(document.getElementById('chartProveedores'), {
-                type: 'bar',
-                data: {
-                    labels: topProv.map(p => p[0].substring(0,25)),
-                    datasets: [{
-                        data: topProv.map(p => p[1]),
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
-                    plugins: { legend: { display: false } },
-                    scales: { x: { ticks: { callback: v => '$' + (v/1e6).toFixed(0) + 'M' } } }
-                }
-            });
+            const seriesHeatmap = [
+                { name: 'Ejército', data: heatmapData["374"].map((monto, i) => ({ x: mesesNombres[i], y: monto })) },
+                { name: 'Armada', data: heatmapData["379"].map((monto, i) => ({ x: mesesNombres[i], y: monto })) },
+                { name: 'Fza. Aérea', data: heatmapData["381"].map((monto, i) => ({ x: mesesNombres[i], y: monto })) },
+                { name: 'EMCO', data: heatmapData["371"].map((monto, i) => ({ x: mesesNombres[i], y: monto })) }
+            ];
 
-            // 3. Fuerzas
+            const optionsHeatmap = {
+                series: seriesHeatmap,
+                chart: { type: 'heatmap', height: 280, toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
+                plotOptions: {
+                    heatmap: {
+                        shadeIntensity: 0.5,
+                        colorScale: {
+                            ranges: [
+                                { from: 0, to: 0, color: '#f1f5f9', name: 'Sin gasto' },
+                                { from: 1, to: 10000000000, color: '#ef4444', name: 'Volumen' }
+                            ]
+                        }
+                    }
+                },
+                dataLabels: { enabled: false },
+                xaxis: { categories: mesesNombres },
+                tooltip: { y: { formatter: val => formatoMoneda.format(val) } }
+            };
+
+            if (apexHeatmap) { apexHeatmap.destroy(); }
+            apexHeatmap = new ApexCharts(document.querySelector("#heatmap-chart"), optionsHeatmap);
+            apexHeatmap.render();
+        }
+
+        // ---------- GRÁFICOS BASE (CHART.JS) ----------
+        function renderGraficosChartJS(datos) {
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            
+            // Fuerzas
             const fuerzasTotales = {};
             datos.forEach(d => {
                 const f = safMap[d.SAF] || 'Otros';
@@ -446,14 +462,14 @@
                     labels: Object.keys(fuerzasTotales),
                     datasets: [{
                         data: Object.values(fuerzasTotales),
-                        backgroundColor: ['#059669', '#2563eb', '#d97706', '#8b5cf6'],
+                        backgroundColor: ['#059669', '#d97706', '#2563eb', '#8b5cf6'],
                         borderWidth: 1
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
             });
 
-            // 4. Procedimientos
+            // Procedimientos
             const procTotales = {};
             datos.forEach(d => { 
                 const proc = d.Procedimiento || 'N/A';
@@ -478,6 +494,7 @@
             });
         }
 
+        // ---------- GRAFO DE REDES (VIS.JS) ----------
         function renderNetworkGraph(datos) {
             const container = document.getElementById('networkGraph');
             const edgesMap = {};
@@ -515,7 +532,6 @@
 
             let maxMontoLinea = 1;
             Object.values(edgesMap).forEach(monto => { if(monto > maxMontoLinea) maxMontoLinea = monto; });
-            
             let maxMontoProv = 1;
             top15Prov.forEach(p => { if(provTotales[p] > maxMontoProv) maxMontoProv = provTotales[p]; });
 
