@@ -8,6 +8,19 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Vis.js para el Grafo de Red -->
+    <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+    <style>
+        /* Estilos específicos para el contenedor del grafo */
+        #networkGraph {
+            width: 100%;
+            height: 100%;
+            border-radius: 0.5rem;
+            outline: none;
+            background-color: #f8fafc;
+        }
+        .vis-network:focus { outline: none; }
+    </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
@@ -20,7 +33,7 @@
                         Contar con Datos 2026 • Exploración Interactiva
                     </div>
                     <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Monitor Logístico: Compras de Defensa</h1>
-                    <p class="text-slate-400 text-sm mt-1">Auditoría, medición de riesgo (HHI) y análisis estratégico de contrataciones.</p>
+                    <p class="text-slate-400 text-sm mt-1">Auditoría, medición de riesgo (HHI) y análisis de redes estratégicas.</p>
                 </div>
                 <div class="flex flex-col items-start md:items-end text-xs text-slate-400">
                     <span class="bg-slate-800 px-3 py-1 rounded-md mb-1 border border-slate-700"><strong>Fuente:</strong> COMPR.AR / ONC</span>
@@ -35,7 +48,7 @@
         <!-- Pantalla de Carga -->
         <div id="loading-state" class="flex flex-col items-center justify-center py-24">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-600 mb-4"></div>
-            <p class="text-slate-600 font-medium">Procesando datos y calculando índices de mercado...</p>
+            <p class="text-slate-600 font-medium">Procesando datos y calculando topología de la red...</p>
         </div>
 
         <div id="dashboard-content" class="hidden space-y-6">
@@ -76,7 +89,7 @@
                 </div>
             </section>
 
-            <!-- Tarjetas de KPIs (Incluye la nueva métrica HHI) -->
+            <!-- Tarjetas de KPIs -->
             <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-blue-600 shadow-sm">
                     <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Monto Adjudicado</p>
@@ -89,7 +102,6 @@
                     <p class="text-xs text-slate-400 mt-1">Procesos finalizados</p>
                 </div>
                 
-                <!-- KPI Avanzado: Índice HHI -->
                 <div id="card-hhi" class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm transition-colors">
                     <p class="text-xs font-bold uppercase tracking-wider text-slate-500 flex justify-between">
                         Riesgo Logístico (HHI)
@@ -105,10 +117,22 @@
                 </div>
             </section>
 
-            <!-- Gráficos de Inteligencia Estratégica -->
+            <!-- Gráficos Estratégicos -->
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
-                <!-- Gráfico de Rubros (Nuevo) -->
+                <!-- Grafo de Redes (Sustituye al gráfico de barras de Proveedores) -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col lg:col-span-2">
+                    <div class="mb-4">
+                        <h3 class="text-base font-bold text-slate-800">Ecosistema Interactivo de Proveedores (Network Graph)</h3>
+                        <p class="text-xs text-slate-500 mt-1">Nodos azules: Fuerzas Armadas. Nodos grises: Top 15 Proveedores (el tamaño indica el volumen adjudicado). El grosor de las líneas representa la intensidad financiera de la relación. Arrastrá los nodos o hacé scroll para alejar/acercar.</p>
+                    </div>
+                    <div class="relative w-full border border-slate-200" style="height: 450px;">
+                        <!-- Contenedor donde Vis.js dibujará el grafo -->
+                        <div id="networkGraph"></div>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Rubros -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <div class="mb-4">
                         <h3 class="text-base font-bold text-slate-800">Ejecución Logística por Rubro</h3>
@@ -119,28 +143,13 @@
                     </div>
                 </div>
 
-                <!-- Gráfico de Proveedores -->
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                    <div class="mb-4">
-                        <h3 class="text-base font-bold text-slate-800">Top 5 Proveedores Estratégicos</h3>
-                        <p class="text-xs text-slate-500 mt-1">Volumen monetario concentrado en los principales adjudicatarios.</p>
-                    </div>
-                    <div class="relative h-64 w-full">
-                        <canvas id="chartProveedores"></canvas>
-                    </div>
-                </div>
-
                 <!-- Gráfico Fuerzas y Procedimientos -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 class="text-base font-bold text-slate-800 mb-4">Fondos por Fuerza / Organismo</h3>
+                    <div class="mb-4">
+                        <h3 class="text-base font-bold text-slate-800 mb-4">Fondos por Fuerza / Organismo</h3>
+                    </div>
                     <div class="relative h-56 w-full flex justify-center">
                         <canvas id="chartFuerzas"></canvas>
-                    </div>
-                </div>
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 class="text-base font-bold text-slate-800 mb-4">Monto por Modalidad de Contratación</h3>
-                    <div class="relative h-56 w-full">
-                        <canvas id="chartProcedimientos"></canvas>
                     </div>
                 </div>
 
@@ -148,16 +157,24 @@
         </div>
     </main>
 
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 text-slate-500 text-xs py-6">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            Plataforma desarrollada para el certamen nacional de visualización de datos abiertos <strong>Contar con Datos 2026</strong>.
+        </div>
+    </footer>
+
     <!-- Lógica JavaScript -->
     <script>
         let rawData = [];
-        let chartRubrosInst = null, chartFuerzasInst = null, chartProvInst = null, chartProcInst = null;
+        let chartRubrosInst = null, chartFuerzasInst = null;
+        let networkInst = null; // Instancia global para Vis.js
 
+        const safMap = { "371": "EMCO", "374": "Ejército", "379": "Armada", "381": "Fuerza Aérea" };
         const formatoMoneda = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // NOTA: Asegurate de subir el nuevo archivo 'datos_tablero_v2.json' a tu repo
                 const res = await fetch('datos_tablero_v2.json');
                 rawData = await res.json();
 
@@ -208,27 +225,25 @@
                 (fProc === 'TODOS' || d.Procedimiento === fProc)
             );
 
+            // KPIs
             const totalMonto = filtrados.reduce((a, b) => a + Number(b.Monto || 0), 0);
             document.getElementById('kpi-volumen').textContent = formatoMoneda.format(totalMonto);
             document.getElementById('kpi-expedientes').textContent = filtrados.length.toLocaleString('es-AR');
 
-            // Agrupación por Proveedor
             const provTotales = {};
             filtrados.forEach(d => {
                 if(d.Proveedor) provTotales[d.Proveedor] = (provTotales[d.Proveedor] || 0) + Number(d.Monto);
             });
 
-            // 1. Mayor Proveedor
             const topProv = Object.entries(provTotales).sort((a,b) => b[1]-a[1])[0];
             document.getElementById('kpi-proveedor').textContent = topProv ? topProv[0] : 'Sin datos';
             document.getElementById('kpi-proveedor-monto').textContent = topProv ? formatoMoneda.format(topProv[1]) : '$0';
 
-            // 2. Cálculo Matemático del Riesgo: Índice HHI
+            // HHI
             let hhi = 0;
             if (totalMonto > 0) {
                 Object.values(provTotales).forEach(monto => {
-                    const cuotaMercado = (monto / totalMonto) * 100;
-                    hhi += Math.pow(cuotaMercado, 2);
+                    hhi += Math.pow((monto / totalMonto) * 100, 2);
                 });
             }
             
@@ -236,7 +251,6 @@
             const hhiLabel = document.getElementById('kpi-hhi-etiqueta');
             document.getElementById('kpi-hhi-valor').textContent = hhi.toFixed(0);
 
-            // Umbrales internacionales del DoJ (EE.UU.)
             if (hhi === 0) {
                 cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm";
                 hhiLabel.textContent = "Sin datos";
@@ -255,13 +269,14 @@
                 hhiLabel.className = "text-xs font-bold mt-1 px-2 py-0.5 inline-block rounded-md bg-red-100 text-red-800";
             }
 
-            renderGraficos(filtrados, provTotales);
+            renderGraficos(filtrados);
+            renderNetworkGraph(filtrados);
         }
 
-        function renderGraficos(datos, provTotales) {
+        function renderGraficos(datos) {
             Chart.defaults.font.family = "'Inter', sans-serif";
             
-            // Gráfico 1: Rubros
+            // Rubros
             const rubroTotales = {};
             datos.forEach(d => {
                 const r = d.Rubro || 'Otros';
@@ -287,31 +302,10 @@
                 }
             });
 
-            // Gráfico 2: Top Proveedores
-            const topProv = Object.entries(provTotales).sort((a,b) => b[1]-a[1]).slice(0, 5);
-            if(chartProvInst) chartProvInst.destroy();
-            chartProvInst = new Chart(document.getElementById('chartProveedores'), {
-                type: 'bar',
-                data: {
-                    labels: topProv.map(p => p[0].substring(0,25)),
-                    datasets: [{
-                        data: topProv.map(p => p[1]),
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
-                    plugins: { legend: { display: false } },
-                    scales: { x: { ticks: { callback: v => '$' + (v/1e6).toFixed(0) + 'M' } } }
-                }
-            });
-
-            // Gráfico 3: Fuerzas
+            // Fuerzas
             const fuerzasTotales = {};
             datos.forEach(d => {
-                const fMap = {"371":"EMCO", "374":"Ejército", "379":"Armada", "381":"Fuerza Aérea"};
-                const f = fMap[d.SAF] || 'Otros';
+                const f = safMap[d.SAF] || 'Otros';
                 fuerzasTotales[f] = (fuerzasTotales[f] || 0) + Number(d.Monto);
             });
             if(chartFuerzasInst) chartFuerzasInst.destroy();
@@ -327,27 +321,124 @@
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
             });
+        }
 
-            // Gráfico 4: Procedimientos
-            const procTotales = {};
-            datos.forEach(d => { procTotales[d.Procedimiento] = (procTotales[d.Procedimiento] || 0) + Number(d.Monto); });
-            if(chartProcInst) chartProcInst.destroy();
-            chartProcInst = new Chart(document.getElementById('chartProcedimientos'), {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(procTotales),
-                    datasets: [{
-                        data: Object.values(procTotales),
-                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#64748b'],
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { ticks: { callback: v => '$' + (v/1e6).toFixed(0) + 'M' } } }
+        function renderNetworkGraph(datos) {
+            const container = document.getElementById('networkGraph');
+            
+            // Extraer relaciones Fuerza -> Proveedor (dinero total entre ellos)
+            const edgesMap = {}; // "Fuerza|Proveedor" -> Monto
+            const provTotales = {}; // "Proveedor" -> Monto total
+
+            datos.forEach(d => {
+                if(!d.Proveedor) return;
+                const fuerza = safMap[d.SAF] || `SAF ${d.SAF}`;
+                const prov = d.Proveedor;
+                const monto = Number(d.Monto) || 0;
+                
+                const key = `${fuerza}|${prov}`;
+                edgesMap[key] = (edgesMap[key] || 0) + monto;
+                provTotales[prov] = (provTotales[prov] || 0) + monto;
+            });
+
+            // Solo mostrar el top 15 de proveedores (para no saturar el grafo visualmente)
+            const top15Prov = Object.entries(provTotales)
+                                    .sort((a,b) => b[1]-a[1])
+                                    .slice(0, 15)
+                                    .map(p => p[0]);
+
+            const nodos = new vis.DataSet();
+            const aristas = new vis.DataSet();
+            
+            const nodosCreados = new Set();
+            let nodeIdCounter = 1;
+
+            // Constantes de diseño para los nodos "Fuerza"
+            const fuerzaColors = {
+                "Ejército": "#059669",
+                "Armada": "#d97706",
+                "Fuerza Aérea": "#2563eb",
+                "EMCO": "#8b5cf6"
+            };
+
+            // Crear nodos "Fuerza" si es que existen en la info filtrada
+            Object.values(safMap).forEach(f => {
+                if (datos.some(d => (safMap[d.SAF] || `SAF ${d.SAF}`) === f)) {
+                    nodos.add({
+                        id: f, label: f, 
+                        shape: 'dot', size: 30, 
+                        color: { background: fuerzaColors[f] || '#64748b', border: '#ffffff' },
+                        font: { color: '#1e293b', face: 'Inter', bold: true }
+                    });
+                    nodosCreados.add(f);
                 }
             });
+
+            // Encontrar el monto máximo de conexión para escalar el grosor de las líneas
+            let maxMontoLinea = 1;
+            Object.values(edgesMap).forEach(monto => { if(monto > maxMontoLinea) maxMontoLinea = monto; });
+            
+            // Encontrar el proveedor con mayor dinero para escalar el tamaño de la burbuja
+            let maxMontoProv = 1;
+            top15Prov.forEach(p => { if(provTotales[p] > maxMontoProv) maxMontoProv = provTotales[p]; });
+
+            // Generar nodos y aristas de Proveedores
+            Object.entries(edgesMap).forEach(([key, monto]) => {
+                const [fuerza, prov] = key.split('|');
+                
+                if (top15Prov.includes(prov)) {
+                    // Crear nodo proveedor si no existe
+                    if (!nodosCreados.has(prov)) {
+                        // El tamaño del nodo depende de la plata total que movió
+                        const minSize = 10;
+                        const maxSize = 40;
+                        const nodeSize = minSize + ((provTotales[prov] / maxMontoProv) * (maxSize - minSize));
+
+                        nodos.add({
+                            id: prov, label: prov.substring(0, 20) + (prov.length>20?'...':''), 
+                            title: `<b>${prov}</b><br>Facturación: ${formatoMoneda.format(provTotales[prov])}`,
+                            shape: 'dot', size: nodeSize, 
+                            color: { background: '#cbd5e1', border: '#94a3b8' },
+                            font: { size: 12, color: '#475569', face: 'Inter' }
+                        });
+                        nodosCreados.add(prov);
+                    }
+
+                    // Calcular grosor de la línea
+                    const minWidth = 1;
+                    const maxWidth = 10;
+                    const edgeWidth = minWidth + ((monto / maxMontoLinea) * (maxWidth - minWidth));
+
+                    // Crear conexión
+                    aristas.add({
+                        from: fuerza,
+                        to: prov,
+                        value: edgeWidth,
+                        title: `Monto adjudicado: ${formatoMoneda.format(monto)}`,
+                        color: { color: '#e2e8f0', hover: '#94a3b8', opacity: 0.8 }
+                    });
+                }
+            });
+
+            const dataVis = { nodes: nodos, edges: aristas };
+            const options = {
+                nodes: {
+                    borderWidth: 2,
+                    shadow: true
+                },
+                edges: {
+                    smooth: { type: 'continuous' }
+                },
+                physics: {
+                    barnesHut: { gravitationalConstant: -3000, springConstant: 0.04, springLength: 150 },
+                    stabilization: { iterations: 150 }
+                },
+                interaction: { hover: true, tooltipDelay: 200 }
+            };
+
+            // Destruir instancia anterior si existe (cuando el usuario aplica filtros)
+            if (networkInst !== null) { networkInst.destroy(); }
+            networkInst = new vis.Network(container, dataVis, options);
         }
     </script>
 </body>
