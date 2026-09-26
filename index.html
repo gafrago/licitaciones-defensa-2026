@@ -9,79 +9,66 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col">
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
     <!-- Encabezado Institucional -->
     <header class="bg-slate-900 border-b border-slate-800 text-white shadow-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                    <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-900 text-blue-200 border border-blue-700 mb-2">
+                    <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide bg-blue-900 text-blue-200 border border-blue-700 mb-2">
                         Contar con Datos 2026 • Exploración Interactiva
                     </div>
-                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Monitor Logístico: Compras de las Fuerzas Armadas</h1>
-                    <p class="text-slate-400 text-sm mt-1">Auditoría, trazabilidad y análisis estratégico de contrataciones públicas (2016 - 2026)</p>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Monitor Logístico: Compras de Defensa</h1>
+                    <p class="text-slate-400 text-sm mt-1">Auditoría, medición de riesgo (HHI) y análisis estratégico de contrataciones.</p>
                 </div>
-                <div class="flex items-center gap-3 text-xs text-slate-400 border-l border-slate-700 pl-4">
-                    <span><strong>Fuente:</strong> COMPR.AR / ONC</span>
-                    <span>•</span>
-                    <span><strong>Datos Abiertos:</strong> datos.gob.ar</span>
+                <div class="flex flex-col items-start md:items-end text-xs text-slate-400">
+                    <span class="bg-slate-800 px-3 py-1 rounded-md mb-1 border border-slate-700"><strong>Fuente:</strong> COMPR.AR / ONC</span>
+                    <span class="bg-slate-800 px-3 py-1 rounded-md border border-slate-700"><strong>Datos Abiertos:</strong> datos.gob.ar</span>
                 </div>
             </div>
         </div>
     </header>
 
-    <!-- Contenedor Principal -->
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        <!-- Mensaje de Error (Oculto por defecto) -->
-        <div id="error-message" class="hidden bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg shadow-sm mb-6" role="alert">
-            <div class="flex items-center">
-                <span class="text-red-700 font-semibold mr-2">Error de carga:</span>
-                <span class="text-red-600 text-sm" id="error-text">No se pudo acceder al repositorio de datos.</span>
-            </div>
-        </div>
-
-        <!-- Pantalla de Carga (Spinner) -->
+        <!-- Pantalla de Carga -->
         <div id="loading-state" class="flex flex-col items-center justify-center py-24">
-            <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-300 border-t-blue-600 mb-4"></div>
-            <p class="text-slate-600 text-base font-medium">Cargando base de licitaciones y compilando métricas...</p>
+            <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-600 mb-4"></div>
+            <p class="text-slate-600 font-medium">Procesando datos y calculando índices de mercado...</p>
         </div>
 
-        <!-- Panel Interactivo (Se activa tras cargar el JSON) -->
         <div id="dashboard-content" class="hidden space-y-6">
 
-            <!-- Barra de Filtros Interactivos -->
+            <!-- Barra de Filtros -->
             <section class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex flex-col sm:flex-row items-center justify-between pb-3 mb-4 border-b border-slate-100 gap-2">
                     <h2 class="text-sm font-bold uppercase tracking-wider text-slate-600 flex items-center gap-2">
-                        <span>Filtros de Análisis</span>
+                        <span>Filtros Dinámicos</span>
                     </h2>
-                    <button id="btn-reset" class="text-xs text-blue-600 hover:text-blue-800 font-medium transition">
+                    <button id="btn-reset" class="text-xs text-blue-600 hover:text-blue-800 font-bold transition bg-blue-50 px-3 py-1.5 rounded">
                         Restablecer filtros
                     </button>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                        <label for="filtro-fuerza" class="block text-xs font-semibold text-slate-500 mb-1">Fuerza / Organismo (SAF)</label>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Fuerza / Organismo</label>
                         <select id="filtro-fuerza" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
                             <option value="TODAS">Todas las Fuerzas</option>
-                            <option value="381">Fuerza Aérea Argentina (SAF 381)</option>
-                            <option value="374">Ejército Argentino (SAF 374)</option>
-                            <option value="379">Armada Argentina (SAF 379)</option>
-                            <option value="371">Estado Mayor Conjunto (SAF 371)</option>
+                            <option value="381">Fuerza Aérea Argentina</option>
+                            <option value="374">Ejército Argentino</option>
+                            <option value="379">Armada Argentina</option>
+                            <option value="371">Estado Mayor Conjunto</option>
                         </select>
                     </div>
-
                     <div>
-                        <label for="filtro-ejercicio" class="block text-xs font-semibold text-slate-500 mb-1">Año / Ejercicio Presupuestario</label>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Ejercicio Presupuestario</label>
                         <select id="filtro-ejercicio" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
                             <option value="TODOS">Todos los Años</option>
                         </select>
                     </div>
-
                     <div>
-                        <label for="filtro-procedimiento" class="block text-xs font-semibold text-slate-500 mb-1">Tipo de Procedimiento</label>
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Tipo de Procedimiento</label>
                         <select id="filtro-procedimiento" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
                             <option value="TODOS">Todos los Procedimientos</option>
                         </select>
@@ -89,167 +76,119 @@
                 </div>
             </section>
 
-            <!-- Tarjetas de KPIs -->
+            <!-- Tarjetas de KPIs (Incluye la nueva métrica HHI) -->
             <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-blue-600 shadow-sm">
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Monto Total Filtrado</p>
-                    <p class="text-2xl font-bold text-slate-900 mt-2 truncate" id="kpi-volumen">$ 0</p>
-                    <p class="text-xs text-slate-400 mt-1">Moneda nacional (ARS)</p>
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Monto Adjudicado</p>
+                    <p class="text-2xl font-black text-slate-800 mt-2 truncate" id="kpi-volumen">$ 0</p>
+                    <p class="text-xs text-slate-400 mt-1">Presupuesto ejecutado (ARS)</p>
                 </div>
                 <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm">
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Total Expedientes</p>
-                    <p class="text-2xl font-bold text-slate-900 mt-2" id="kpi-expedientes">0</p>
-                    <p class="text-xs text-slate-400 mt-1">Actos de compra registrados</p>
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Expedientes</p>
+                    <p class="text-2xl font-black text-slate-800 mt-2" id="kpi-expedientes">0</p>
+                    <p class="text-xs text-slate-400 mt-1">Procesos finalizados</p>
                 </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-amber-500 shadow-sm">
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Monto Promedio</p>
-                    <p class="text-2xl font-bold text-slate-900 mt-2 truncate" id="kpi-promedio">$ 0</p>
-                    <p class="text-xs text-slate-400 mt-1">Por proceso licitado</p>
+                
+                <!-- KPI Avanzado: Índice HHI -->
+                <div id="card-hhi" class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm transition-colors">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500 flex justify-between">
+                        Riesgo Logístico (HHI)
+                    </p>
+                    <p class="text-2xl font-black mt-2" id="kpi-hhi-valor">0</p>
+                    <p class="text-xs font-semibold mt-1 px-2 py-0.5 inline-block rounded-md" id="kpi-hhi-etiqueta">Calculando...</p>
                 </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-indigo-600 shadow-sm">
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Mayor Proveedor</p>
-                    <p class="text-base font-bold text-slate-900 mt-2 truncate" id="kpi-proveedor">-</p>
-                    <p class="text-xs text-slate-400 mt-1" id="kpi-proveedor-monto">Por volumen acumulado</p>
+
+                <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-slate-800 shadow-sm">
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Mayor Contratista</p>
+                    <p class="text-sm font-bold text-slate-800 mt-2 line-clamp-2 leading-tight" id="kpi-proveedor">-</p>
+                    <p class="text-xs text-slate-500 mt-2 font-mono bg-slate-100 px-2 py-1 rounded inline-block" id="kpi-proveedor-monto">$ 0</p>
                 </div>
             </section>
 
-            <!-- Gráficos Principales -->
+            <!-- Gráficos de Inteligencia Estratégica -->
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Gráfico 1 -->
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                
+                <!-- Gráfico de Rubros (Nuevo) -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <div class="mb-4">
-                        <h3 class="text-base font-bold text-slate-800">Distribución Presupuestaria por Fuerza</h3>
-                        <p class="text-xs text-slate-500 mt-1">Porcentaje de fondos acumulados según organismo ejecutor</p>
+                        <h3 class="text-base font-bold text-slate-800">Ejecución Logística por Rubro</h3>
+                        <p class="text-xs text-slate-500 mt-1">Distribución del gasto en insumos operativos y de sostenimiento.</p>
                     </div>
-                    <div class="relative h-64 sm:h-72 w-full flex items-center justify-center">
-                        <canvas id="chartFuerzas"></canvas>
+                    <div class="relative h-64 w-full">
+                        <canvas id="chartRubros"></canvas>
                     </div>
                 </div>
 
-                <!-- Gráfico 2 -->
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                <!-- Gráfico de Proveedores -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <div class="mb-4">
                         <h3 class="text-base font-bold text-slate-800">Top 5 Proveedores Estratégicos</h3>
-                        <p class="text-xs text-slate-500 mt-1">Nivel de concentración de mercado y proveedores adjudicados</p>
+                        <p class="text-xs text-slate-500 mt-1">Volumen monetario concentrado en los principales adjudicatarios.</p>
                     </div>
-                    <div class="relative h-64 sm:h-72 w-full">
+                    <div class="relative h-64 w-full">
                         <canvas id="chartProveedores"></canvas>
                     </div>
                 </div>
 
-                <!-- Gráfico 3 (Ancho completo) -->
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
-                    <div class="mb-4">
-                        <h3 class="text-base font-bold text-slate-800">Evolución por Modalidad de Contratación</h3>
-                        <p class="text-xs text-slate-500 mt-1">Relación entre Licitación Pública, Contratación Directa y Trámites Privados</p>
+                <!-- Gráfico Fuerzas y Procedimientos -->
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-bold text-slate-800 mb-4">Fondos por Fuerza / Organismo</h3>
+                    <div class="relative h-56 w-full flex justify-center">
+                        <canvas id="chartFuerzas"></canvas>
                     </div>
-                    <div class="relative h-64 w-full">
+                </div>
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                    <h3 class="text-base font-bold text-slate-800 mb-4">Monto por Modalidad de Contratación</h3>
+                    <div class="relative h-56 w-full">
                         <canvas id="chartProcedimientos"></canvas>
                     </div>
                 </div>
-            </section>
 
-            <!-- Memoria Metodológica y Ficha Técnica del Concurso -->
-            <section class="bg-slate-50 border border-slate-200 rounded-xl p-6 shadow-sm mt-8">
-                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-700 mb-3">Nota Metodológica y Fuentes Oficiales</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-xs text-slate-600 leading-relaxed">
-                    <div>
-                        <strong class="text-slate-800 block mb-1">1. Origen de la Información</strong>
-                        Datos procesados a partir del registro unificado del Sistema Electrónico de Contrataciones de la Administración Nacional (COMPR.AR), publicado por la Oficina Nacional de Contrataciones (ONC) a través del Portal Nacional de Datos Abiertos (datos.gob.ar).
-                    </div>
-                    <div>
-                        <strong class="text-slate-800 block mb-1">2. Criterios de Selección</strong>
-                        Se aislaron las adjudicaciones pertenecientes a la Jurisdicción 45 (Defensa), filtrando los Servicios Administrativo Financieros: SAF 371 (EMCO), SAF 374 (Ejército), SAF 379 (Armada) y SAF 381 (Fuerza Aérea).
-                    </div>
-                    <div>
-                        <strong class="text-slate-800 block mb-1">3. Normalización</strong>
-                        Los valores monetarios corresponden a contratos perfeccionados en pesos argentinos (ARS). Se consolidaron duplicidades de razones sociales de contratistas para el cálculo de concentración económica.
-                    </div>
-                </div>
             </section>
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-slate-900 border-t border-slate-800 text-slate-500 text-xs py-6">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            Plataforma desarrollada para el certamen nacional de visualización de datos abiertos <strong>Contar con Datos 2026</strong>.
-        </div>
-    </footer>
-
-    <!-- Lógica de Datos y Visualización -->
+    <!-- Lógica JavaScript -->
     <script>
         let rawData = [];
-        let chartFuerzasInstance = null;
-        let chartProveedoresInstance = null;
-        let chartProcedimientosInstance = null;
+        let chartRubrosInst = null, chartFuerzasInst = null, chartProvInst = null, chartProcInst = null;
 
-        const safMap = {
-            "371": "EMCO",
-            "374": "Ejército",
-            "379": "Armada",
-            "381": "Fuerza Aérea"
-        };
-
-        const formatoMoneda = new Intl.NumberFormat('es-AR', {
-            style: 'currency',
-            currency: 'ARS',
-            maximumFractionDigits: 0
-        });
+        const formatoMoneda = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
-                const response = await fetch('datos_tablero.json');
-                if (!response.ok) throw new Error(`HTTP Error: ${response.status}`);
-
-                rawData = await response.json();
-                if (!rawData || rawData.length === 0) throw new Error("Dataset vacío.");
+                // NOTA: Asegurate de subir el nuevo archivo 'datos_tablero_v2.json' a tu repo
+                const res = await fetch('datos_tablero_v2.json');
+                rawData = await res.json();
 
                 poblarSelectores(rawData);
                 registrarEventos();
                 actualizarTablero();
 
-                // Transición UX
                 document.getElementById('loading-state').classList.add('hidden');
                 document.getElementById('dashboard-content').classList.remove('hidden');
-
-            } catch (error) {
-                console.error("Falla en la carga:", error);
-                document.getElementById('loading-state').classList.add('hidden');
-                const errorBox = document.getElementById('error-message');
-                errorBox.classList.remove('hidden');
-                document.getElementById('error-text').innerText = "No se pudo leer 'datos_tablero.json'. Verificá que el archivo esté presente en la rama del repositorio.";
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loading-state').innerHTML = `<p class="text-red-600 font-bold">Error al cargar 'datos_tablero_v2.json'. Asegurate de haberlo subido a GitHub.</p>`;
             }
         });
 
         function poblarSelectores(datos) {
-            const selectEjercicio = document.getElementById('filtro-ejercicio');
-            const selectProcedimiento = document.getElementById('filtro-procedimiento');
-
-            // Extraer años únicos ordenados
-            const ejercicios = [...new Set(datos.map(d => d.Ejercicio).filter(Boolean))].sort((a, b) => b - a);
-            ejercicios.forEach(e => {
-                const opt = document.createElement('option');
-                opt.value = e;
-                opt.textContent = e;
-                selectEjercicio.appendChild(opt);
+            const ejSelect = document.getElementById('filtro-ejercicio');
+            const prSelect = document.getElementById('filtro-procedimiento');
+            
+            [...new Set(datos.map(d => d.Ejercicio))].filter(Boolean).sort().reverse().forEach(e => {
+                ejSelect.add(new Option(e, e));
             });
-
-            // Extraer tipos de procedimiento únicos
-            const procedimientos = [...new Set(datos.map(d => d.Procedimiento).filter(Boolean))].sort();
-            procedimientos.forEach(p => {
-                const opt = document.createElement('option');
-                opt.value = p;
-                opt.textContent = p;
-                selectProcedimiento.appendChild(opt);
+            [...new Set(datos.map(d => d.Procedimiento))].filter(Boolean).sort().forEach(p => {
+                prSelect.add(new Option(p, p));
             });
         }
 
         function registrarEventos() {
-            document.getElementById('filtro-fuerza').addEventListener('change', actualizarTablero);
-            document.getElementById('filtro-ejercicio').addEventListener('change', actualizarTablero);
-            document.getElementById('filtro-procedimiento').addEventListener('change', actualizarTablero);
-
+            ['filtro-fuerza', 'filtro-ejercicio', 'filtro-procedimiento'].forEach(id => {
+                document.getElementById(id).addEventListener('change', actualizarTablero);
+            });
             document.getElementById('btn-reset').addEventListener('click', () => {
                 document.getElementById('filtro-fuerza').value = 'TODAS';
                 document.getElementById('filtro-ejercicio').value = 'TODOS';
@@ -258,181 +197,155 @@
             });
         }
 
-        function obtenerDatosFiltrados() {
-            const fuerzaSel = document.getElementById('filtro-fuerza').value;
-            const ejercicioSel = document.getElementById('filtro-ejercicio').value;
-            const procedimientoSel = document.getElementById('filtro-procedimiento').value;
-
-            return rawData.filter(d => {
-                const cumpleFuerza = (fuerzaSel === 'TODAS' || d.SAF === fuerzaSel);
-                const cumpleEjercicio = (ejercicioSel === 'TODOS' || String(d.Ejercicio) === ejercicioSel);
-                const cumpleProcedimiento = (procedimientoSel === 'TODOS' || d.Procedimiento === procedimientoSel);
-                const esPesos = d.Moneda && d.Moneda.toLowerCase().includes('peso');
-                return cumpleFuerza && cumpleEjercicio && cumpleProcedimiento && esPesos;
-            });
-        }
-
         function actualizarTablero() {
-            const filtrados = obtenerDatosFiltrados();
+            const fFuerza = document.getElementById('filtro-fuerza').value;
+            const fEj = document.getElementById('filtro-ejercicio').value;
+            const fProc = document.getElementById('filtro-procedimiento').value;
 
-            // 1. Cálculo de KPIs
-            const totalMonto = filtrados.reduce((acc, curr) => acc + (Number(curr.Monto) || 0), 0);
-            const totalExp = filtrados.length;
-            const promedio = totalExp > 0 ? (totalMonto / totalExp) : 0;
+            const filtrados = rawData.filter(d => 
+                (fFuerza === 'TODAS' || d.SAF === fFuerza) &&
+                (fEj === 'TODOS' || d.Ejercicio === fEj) &&
+                (fProc === 'TODOS' || d.Procedimiento === fProc)
+            );
 
+            const totalMonto = filtrados.reduce((a, b) => a + Number(b.Monto || 0), 0);
             document.getElementById('kpi-volumen').textContent = formatoMoneda.format(totalMonto);
-            document.getElementById('kpi-expedientes').textContent = totalExp.toLocaleString('es-AR');
-            document.getElementById('kpi-promedio').textContent = formatoMoneda.format(promedio);
+            document.getElementById('kpi-expedientes').textContent = filtrados.length.toLocaleString('es-AR');
 
-            // Proveedor líder
+            // Agrupación por Proveedor
             const provTotales = {};
             filtrados.forEach(d => {
-                if (d.Proveedor && d.Proveedor.trim() !== '') {
-                    provTotales[d.Proveedor] = (provTotales[d.Proveedor] || 0) + Number(d.Monto);
-                }
+                if(d.Proveedor) provTotales[d.Proveedor] = (provTotales[d.Proveedor] || 0) + Number(d.Monto);
             });
 
-            const topProveedor = Object.entries(provTotales).sort((a, b) => b[1] - a[1])[0];
-            if (topProveedor) {
-                document.getElementById('kpi-proveedor').textContent = topProveedor[0];
-                document.getElementById('kpi-proveedor-monto').textContent = formatoMoneda.format(topProveedor[1]);
+            // 1. Mayor Proveedor
+            const topProv = Object.entries(provTotales).sort((a,b) => b[1]-a[1])[0];
+            document.getElementById('kpi-proveedor').textContent = topProv ? topProv[0] : 'Sin datos';
+            document.getElementById('kpi-proveedor-monto').textContent = topProv ? formatoMoneda.format(topProv[1]) : '$0';
+
+            // 2. Cálculo Matemático del Riesgo: Índice HHI
+            let hhi = 0;
+            if (totalMonto > 0) {
+                Object.values(provTotales).forEach(monto => {
+                    const cuotaMercado = (monto / totalMonto) * 100;
+                    hhi += Math.pow(cuotaMercado, 2);
+                });
+            }
+            
+            const cardHhi = document.getElementById('card-hhi');
+            const hhiLabel = document.getElementById('kpi-hhi-etiqueta');
+            document.getElementById('kpi-hhi-valor').textContent = hhi.toFixed(0);
+
+            // Umbrales internacionales del DoJ (EE.UU.)
+            if (hhi === 0) {
+                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm";
+                hhiLabel.textContent = "Sin datos";
+                hhiLabel.className = "text-xs font-semibold mt-1 px-2 py-0.5 inline-block rounded-md bg-slate-100 text-slate-600";
+            } else if (hhi < 1500) {
+                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm";
+                hhiLabel.textContent = "Competitivo (Bajo Riesgo)";
+                hhiLabel.className = "text-xs font-bold mt-1 px-2 py-0.5 inline-block rounded-md bg-emerald-100 text-emerald-800";
+            } else if (hhi <= 2500) {
+                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-yellow-400 shadow-sm";
+                hhiLabel.textContent = "Concentración Moderada";
+                hhiLabel.className = "text-xs font-bold mt-1 px-2 py-0.5 inline-block rounded-md bg-yellow-100 text-yellow-800";
             } else {
-                document.getElementById('kpi-proveedor').textContent = 'Sin datos';
-                document.getElementById('kpi-proveedor-monto').textContent = '$ 0';
+                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-red-600 shadow-sm";
+                hhiLabel.textContent = "Riesgo: Monopolio / Oligopolio";
+                hhiLabel.className = "text-xs font-bold mt-1 px-2 py-0.5 inline-block rounded-md bg-red-100 text-red-800";
             }
 
-            // 2. Renderizado de Gráficos
-            renderGraficoFuerzas(filtrados);
-            renderGraficoProveedores(filtrados);
-            renderGraficoProcedimientos(filtrados);
+            renderGraficos(filtrados, provTotales);
         }
 
-        function renderGraficoFuerzas(datos) {
-            const agrupado = {};
+        function renderGraficos(datos, provTotales) {
+            Chart.defaults.font.family = "'Inter', sans-serif";
+            
+            // Gráfico 1: Rubros
+            const rubroTotales = {};
             datos.forEach(d => {
-                const nombreFuerza = safMap[d.SAF] || `SAF ${d.SAF}`;
-                agrupado[nombreFuerza] = (agrupado[nombreFuerza] || 0) + Number(d.Monto);
+                const r = d.Rubro || 'Otros';
+                rubroTotales[r] = (rubroTotales[r] || 0) + Number(d.Monto);
             });
-
-            const ctx = document.getElementById('chartFuerzas').getContext('2d');
-            if (chartFuerzasInstance) chartFuerzasInstance.destroy();
-
-            chartFuerzasInstance = new Chart(ctx, {
-                type: 'doughnut',
+            const topRubros = Object.entries(rubroTotales).sort((a,b) => b[1]-a[1]).slice(0, 6);
+            
+            if(chartRubrosInst) chartRubrosInst.destroy();
+            chartRubrosInst = new Chart(document.getElementById('chartRubros'), {
+                type: 'bar',
                 data: {
-                    labels: Object.keys(agrupado),
+                    labels: topRubros.map(p => p[0]),
                     datasets: [{
-                        data: Object.values(agrupado),
-                        backgroundColor: ['#2563eb', '#059669', '#d97706', '#6366f1'],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
+                        data: topRubros.map(p => p[1]),
+                        backgroundColor: '#6366f1',
+                        borderRadius: 4
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } },
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => ` ${ctx.label}: ${formatoMoneda.format(ctx.raw)}`
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function renderGraficoProveedores(datos) {
-            const agrupado = {};
-            datos.forEach(d => {
-                if (d.Proveedor) {
-                    agrupado[d.Proveedor] = (agrupado[d.Proveedor] || 0) + Number(d.Monto);
+                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: { x: { ticks: { callback: v => '$' + (v/1e6).toFixed(0) + 'M' } } }
                 }
             });
 
-            const top5 = Object.entries(agrupado).sort((a, b) => b[1] - a[1]).slice(0, 5);
-
-            const ctx = document.getElementById('chartProveedores').getContext('2d');
-            if (chartProveedoresInstance) chartProveedoresInstance.destroy();
-
-            chartProveedoresInstance = new Chart(ctx, {
+            // Gráfico 2: Top Proveedores
+            const topProv = Object.entries(provTotales).sort((a,b) => b[1]-a[1]).slice(0, 5);
+            if(chartProvInst) chartProvInst.destroy();
+            chartProvInst = new Chart(document.getElementById('chartProveedores'), {
                 type: 'bar',
                 data: {
-                    labels: top5.map(p => p[0].length > 22 ? p[0].substring(0, 22) + '...' : p[0]),
+                    labels: topProv.map(p => p[0].substring(0,25)),
                     datasets: [{
-                        label: 'Monto Adjudicado (ARS)',
-                        data: top5.map(p => p[1]),
+                        data: topProv.map(p => p[1]),
                         backgroundColor: '#3b82f6',
-                        borderRadius: 6
+                        borderRadius: 4
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    indexAxis: 'y',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => ` Total: ${formatoMoneda.format(ctx.raw)}`
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            ticks: {
-                                callback: val => `$ ${(val / 1e6).toFixed(0)} M`,
-                                font: { size: 10 }
-                            }
-                        },
-                        y: { ticks: { font: { size: 11 } } }
-                    }
+                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                    plugins: { legend: { display: false } },
+                    scales: { x: { ticks: { callback: v => '$' + (v/1e6).toFixed(0) + 'M' } } }
                 }
             });
-        }
 
-        function renderGraficoProcedimientos(datos) {
-            const agrupado = {};
+            // Gráfico 3: Fuerzas
+            const fuerzasTotales = {};
             datos.forEach(d => {
-                const proc = d.Procedimiento || 'No especificado';
-                agrupado[proc] = (agrupado[proc] || 0) + Number(d.Monto);
+                const fMap = {"371":"EMCO", "374":"Ejército", "379":"Armada", "381":"Fuerza Aérea"};
+                const f = fMap[d.SAF] || 'Otros';
+                fuerzasTotales[f] = (fuerzasTotales[f] || 0) + Number(d.Monto);
+            });
+            if(chartFuerzasInst) chartFuerzasInst.destroy();
+            chartFuerzasInst = new Chart(document.getElementById('chartFuerzas'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(fuerzasTotales),
+                    datasets: [{
+                        data: Object.values(fuerzasTotales),
+                        backgroundColor: ['#059669', '#2563eb', '#d97706', '#8b5cf6'],
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
             });
 
-            const ctx = document.getElementById('chartProcedimientos').getContext('2d');
-            if (chartProcedimientosInstance) chartProcedimientosInstance.destroy();
-
-            chartProcedimientosInstance = new Chart(ctx, {
+            // Gráfico 4: Procedimientos
+            const procTotales = {};
+            datos.forEach(d => { procTotales[d.Procedimiento] = (procTotales[d.Procedimiento] || 0) + Number(d.Monto); });
+            if(chartProcInst) chartProcInst.destroy();
+            chartProcInst = new Chart(document.getElementById('chartProcedimientos'), {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(agrupado),
+                    labels: Object.keys(procTotales),
                     datasets: [{
-                        label: 'Total Adjudicado',
-                        data: Object.values(agrupado),
-                        backgroundColor: ['#1d4ed8', '#10b981', '#f59e0b', '#8b5cf6'],
-                        borderRadius: 6
+                        data: Object.values(procTotales),
+                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#64748b'],
+                        borderRadius: 4
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => ` Volumen: ${formatoMoneda.format(ctx.raw)}`
-                            }
-                        }
-                    },
-                    scales: {
-                        y: {
-                            ticks: {
-                                callback: val => `$ ${(val / 1e6).toFixed(0)} M`,
-                                font: { size: 10 }
-                            }
-                        },
-                        x: { ticks: { font: { size: 11 } } }
-                    }
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { ticks: { callback: v => '$' + (v/1e6).toFixed(0) + 'M' } } }
                 }
             });
         }
