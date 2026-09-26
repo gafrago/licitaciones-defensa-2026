@@ -6,11 +6,11 @@
     <title>Monitor de Compras Públicas - Sector Defensa</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js (Para tortas y barras simples) -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Vis.js (Para Grafo de Redes) -->
+    <!-- Vis.js -->
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
-    <!-- ApexCharts (Para Heatmap y Treemap) -->
+    <!-- ApexCharts -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     
     <style>
@@ -19,6 +19,8 @@
         .scrollbar-thin::-webkit-scrollbar { width: 6px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        /* Tooltip simple por CSS */
+        .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
@@ -32,7 +34,7 @@
                         Contar con Datos 2026 • Exploración Interactiva
                     </div>
                     <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Monitor Logístico: Compras de Defensa</h1>
-                    <p class="text-slate-400 text-sm mt-1">Auditoría, inteligencia de datos (BI) y medición de riesgo estructural.</p>
+                    <p class="text-slate-400 text-sm mt-1">Auditoría, inteligencia de datos (BI) y medición de riesgo estructural (2016-2026).</p>
                 </div>
                 <div class="flex flex-col items-start md:items-end text-xs text-slate-400">
                     <span class="bg-slate-800 px-3 py-1 rounded-md mb-1 border border-slate-700"><strong>Fuente:</strong> COMPR.AR / ONC</span>
@@ -88,12 +90,34 @@
                 </div>
             </section>
 
+            <!-- MEJORA 2: PANEL DE DATA STORYtelling (Hallazgos Clave) -->
+            <section class="bg-gradient-to-r from-blue-900 to-slate-900 text-white p-6 rounded-xl shadow-md border border-blue-800">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="bg-blue-500 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Data Storytelling</span>
+                    <h3 class="text-base font-bold">Tres Hallazgos Clave del Período (2016-2026)</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-blue-100">
+                    <div class="bg-blue-950/60 p-3.5 rounded-lg border border-blue-700/50">
+                        <strong class="text-white block mb-1 font-semibold">1. Concentración de Proveedores</strong>
+                        El análisis estructural muestra alta dependencia en rubros críticos de mantenimiento y tecnología, concentrando los mayores flujos en un número reducido de contratistas.
+                    </div>
+                    <div class="bg-blue-950/60 p-3.5 rounded-lg border border-blue-700/50">
+                        <strong class="text-white block mb-1 font-semibold">2. Estacionalidad de Cierre Fiscal</strong>
+                        El mapa de calor evidencia incrementos marcados en la ejecución de compras hacia el tramo final de los años fiscales, reflejando el patrón histórico de gestión presupuestaria estatal.
+                    </div>
+                    <div class="bg-blue-950/60 p-3.5 rounded-lg border border-blue-700/50">
+                        <strong class="text-white block mb-1 font-semibold">3. Tasa de Contratación Directa</strong>
+                        Las modalidades excepcionales se concentran en partidas de urgencia logística, las cuales son monitoreadas automáticamente por nuestra matriz de alertas de riesgo.
+                    </div>
+                </div>
+            </section>
+
             <!-- Tarjetas de KPIs -->
             <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-blue-600 shadow-sm">
                     <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Monto Adjudicado</p>
                     <p class="text-2xl font-black text-slate-800 mt-2 truncate" id="kpi-volumen">$ 0</p>
-                    <p class="text-xs text-slate-400 mt-1">Presupuesto ejecutado (ARS)</p>
+                    <p class="text-xs text-slate-400 mt-1">Presupuesto ejecutado (ARS nominales)</p>
                 </div>
                 <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm">
                     <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Expedientes</p>
@@ -101,10 +125,18 @@
                     <p class="text-xs text-slate-400 mt-1">Procesos finalizados</p>
                 </div>
                 
-                <div id="card-hhi" class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm transition-colors">
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500 flex justify-between">
-                        Riesgo Logístico (HHI)
-                    </p>
+                <!-- MEJORA 3: KPI HHI con Explicabilidad / Tooltip -->
+                <div id="card-hhi" class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm transition-colors relative">
+                    <div class="flex justify-between items-center">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Riesgo Logístico (HHI)</p>
+                        <!-- Icono de Ayuda / Tooltip -->
+                        <div class="relative group cursor-pointer">
+                            <span class="bg-slate-100 text-slate-600 font-bold px-1.5 py-0.5 rounded-full text-[10px] border border-slate-300">?</span>
+                            <div class="absolute bottom-full right-0 mb-2 w-56 p-2 bg-slate-900 text-white text-[11px] rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
+                                <b>Índice HHI:</b> Mide monopolio. Menos de 1500 = Competitivo. Más de 2500 = Alta concentración en pocos proveedores.
+                            </div>
+                        </div>
+                    </div>
                     <p class="text-2xl font-black mt-2" id="kpi-hhi-valor">0</p>
                     <p class="text-xs font-semibold mt-1 px-2 py-0.5 inline-block rounded-md" id="kpi-hhi-etiqueta">Calculando...</p>
                 </div>
@@ -160,7 +192,7 @@
                     <div id="treemap-chart" class="w-full h-72"></div>
                 </div>
 
-                <!-- Heatmap de Estacionalidad corregido -->
+                <!-- Heatmap de Estacionalidad -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <div class="mb-4">
                         <h3 class="text-base font-bold text-slate-800">Mapa de Calor Logístico (Latencia Anual)</h3>
@@ -201,9 +233,18 @@
         </div>
     </main>
 
-    <footer class="bg-slate-900 border-t border-slate-800 text-slate-500 text-xs py-6 mt-8">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            Plataforma desarrollada para el certamen nacional de visualización de datos abiertos <strong>Contar con Datos 2026</strong>.
+    <!-- MEJORA 1: NOTA METODOLÓGICA AMPLIADA SOBRE INFLACIÓN Y VALORES NOMINALES -->
+    <footer class="bg-slate-900 border-t border-slate-800 text-slate-400 text-xs py-8 mt-8">
+        <div class="max-w-7xl mx-auto px-4 space-y-4">
+            <div class="border-b border-slate-800 pb-4">
+                <h4 class="text-white font-bold uppercase tracking-wider mb-1">Nota Metodológica sobre Valores Nominales e Inflación</h4>
+                <p class="leading-relaxed text-slate-400">
+                    En cumplimiento de los estándares de transparencia analítica, se aclara que los montos plurianuales presentados en este monitor (2016-2026) se encuentran expresados en <strong>pesos argentinos a valores nominales históricos</strong> de sus respectivas adjudicaciones. Debido a la inexistencia en fuentes abiertas oficiales de un deflactor sectorial específico para la industria de la defensa, no se aplicó un ajuste por IPC general para evitar distorsiones en los contratos de bienes transables e insumos importados. El valor de este tablero radica en la <em>trazabilidad comparativa interinstitucional</em>, la <em>detección de concentración de mercado (HHI)</em> y la <em>auditoría de procedimientos</em>.
+                </p>
+            </div>
+            <div class="text-center text-slate-500">
+                Plataforma desarrollada para el certamen nacional de visualización de datos abiertos <strong>Contar con Datos 2026</strong>.
+            </div>
         </div>
     </footer>
 
@@ -313,19 +354,19 @@
             document.getElementById('kpi-hhi-valor').textContent = hhi.toFixed(0);
 
             if (hhi === 0) {
-                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm";
+                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm relative";
                 hhiLabel.textContent = "Sin datos";
                 hhiLabel.className = "text-xs font-semibold mt-1 px-2 py-0.5 inline-block rounded-md bg-slate-100 text-slate-600";
             } else if (hhi < 1500) {
-                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm";
+                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm relative";
                 hhiLabel.textContent = "Bajo Riesgo (Competitivo)";
                 hhiLabel.className = "text-xs font-bold mt-1 px-2 py-0.5 inline-block rounded-md bg-emerald-100 text-emerald-800";
             } else if (hhi <= 2500) {
-                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-yellow-400 shadow-sm";
+                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-yellow-400 shadow-sm relative";
                 hhiLabel.textContent = "Concentración Moderada";
                 hhiLabel.className = "text-xs font-bold mt-1 px-2 py-0.5 inline-block rounded-md bg-yellow-100 text-yellow-800";
             } else {
-                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-red-600 shadow-sm";
+                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-red-600 shadow-sm relative";
                 hhiLabel.textContent = "Riesgo Alto (Monopolio)";
                 hhiLabel.className = "text-xs font-bold mt-1 px-2 py-0.5 inline-block rounded-md bg-red-100 text-red-800";
             }
@@ -377,7 +418,7 @@
             renderApexCharts(filtrados);
         }
 
-        // ---------- APEXCHARTS CORREGIDO PARA GRADIENTE EN HEATMAP ----------
+        // ---------- APEXCHARTS CON HEATMAP DINÁMICO ----------
         function renderApexCharts(datos) {
             // 1. Treemap
             const rubroTotales = {};
@@ -403,7 +444,7 @@
             apexTreemap = new ApexCharts(document.querySelector("#treemap-chart"), optionsTreemap);
             apexTreemap.render();
 
-            // 2. Heatmap Corregido (Con colores proporcionales automáticos)
+            // 2. Heatmap Dinámico
             const heatmapData = { "381": Array(12).fill(0), "374": Array(12).fill(0), "379": Array(12).fill(0), "371": Array(12).fill(0) };
             
             datos.forEach(d => {
@@ -424,7 +465,7 @@
                 chart: { type: 'heatmap', height: 280, toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
                 dataLabels: { enabled: false },
                 xaxis: { categories: mesesNombres },
-                colors: ["#3b82f6"], // Gradiente automático proporcional a los valores
+                colors: ["#3b82f6"], // Gradiente automático proporcional
                 tooltip: { y: { formatter: val => formatoMoneda.format(val) } }
             };
 
