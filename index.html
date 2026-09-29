@@ -259,7 +259,8 @@
         const formatoMoneda = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
 
         document.addEventListener('DOMContentLoaded', () => {
-            const csvUrl = 'defensa_compras_2016_2026.csv'; // Asegurate de que tu archivo se llame exactamente así
+            // AQUI ESTÁ EL CAMBIO: Ahora apunta a defensa_compras_liviano.csv
+            const csvUrl = 'defensa_compras_liviano.csv'; 
 
             Papa.parse(csvUrl, {
                 download: true,
@@ -342,7 +343,7 @@
             document.getElementById('loading-state').innerHTML = `
                 <div class="bg-red-50 p-6 rounded-lg border border-red-200 text-center max-w-md">
                     <h3 class="text-red-700 font-bold text-lg mb-2">Error de conexión de datos</h3>
-                    <p class="text-red-600 text-sm">No se pudo procesar el archivo <strong>defensa_compras_2016_2026.csv</strong>.</p>
+                    <p class="text-red-600 text-sm">No se pudo procesar el archivo <strong>defensa_compras_liviano.csv</strong>.</p>
                     <p class="text-red-500 text-xs mt-2">${mensajeExtra}</p>
                 </div>`;
         }
