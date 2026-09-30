@@ -13,8 +13,8 @@
     <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
     <!-- ApexCharts (Para Heatmap y Treemap) -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
-    <!-- PapaParse (Para leer CSV directo en el navegador) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- SheetJS (Para leer archivos Excel/XLSX directo en el navegador) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
         #networkGraph { width: 100%; height: 100%; border-radius: 0.5rem; outline: none; background-color: #f8fafc; }
@@ -51,7 +51,7 @@
         <!-- Pantalla de Carga -->
         <div id="loading-state" class="flex flex-col items-center justify-center py-24">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-600 mb-4"></div>
-            <p class="text-slate-600 font-medium">Leyendo y procesando base de datos oficial (CSV)...</p>
+            <p class="text-slate-600 font-medium">Leyendo y procesando archivo Excel (Libro1.xlsx)...</p>
         </div>
 
         <div id="dashboard-content" class="hidden space-y-6">
@@ -247,7 +247,7 @@
         </div>
     </footer>
 
-    <!-- Lógica JavaScript Principal para parsear el CSV crudo -->
+    <!-- Lógica JavaScript Principal para parsear EXCEL (Libro1.xlsx) crudo -->
     <script>
         let rawData = [];
         let chartFuerzasInst = null, chartProcInst = null;
@@ -258,93 +258,100 @@
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         const formatoMoneda = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            // AQUI ESTÁ EL CAMBIO: Ahora apunta a defensa_compras_liviano.csv
-            const csvUrl = 'defensa_compras_liviano.csv'; 
+        document.addEventListener('DOMContentLoaded', async () => {
+            // AQUI ESTÁ EL CAMBIO: Ahora apunta a Libro1.xlsx
+            const excelUrl = 'Libro1.xlsx'; 
 
-            Papa.parse(csvUrl, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    try {
-                        // 1. Normalizar todas las columnas a minúsculas para que no haya errores
-                        const data = results.data.map(row => {
-                            let newRow = {};
-                            for (let key in row) {
-                                newRow[key.trim().toLowerCase()] = row[key];
-                            }
-                            return newRow;
-                        });
-                        
-                        // 2. Mapear los datos reales a la estructura del tablero
-                        rawData = data.map(row => {
-                            // Convertir formato de moneda Argentina a formato programación
-                            let montoCrudo = String(row.monto_adjudicado || row.monto || row.precio_total || "0");
-                            montoCrudo = montoCrudo.replace(/\$|\s/g, ''); // Saca signos $ y espacios
-                            if (montoCrudo.includes('.') && montoCrudo.includes(',')) {
-                                montoCrudo = montoCrudo.replace(/\./g, '').replace(',', '.'); // Ej: 1.500,50 -> 1500.50
-                            } else if (montoCrudo.includes(',')) {
-                                montoCrudo = montoCrudo.replace(',', '.'); // Ej: 1500,50 -> 1500.50
-                            }
-                            
-                            // Extraer el mes
-                            let mes = 1;
-                            let fecha = row.fecha_adjudicacion || row.fecha_de_adjudicacion || row.fecha || '';
-                            if (fecha) {
-                                if (fecha.includes('-')) {
-                                    const partes = fecha.split('-');
-                                    if (partes[0].length === 4) mes = parseInt(partes[1]);
-                                } else if (fecha.includes('/')) {
-                                    const partes = fecha.split('/');
-                                    mes = parseInt(partes[1]);
-                                }
-                            }
-                            
-                            return {
-                                Proceso: row.numero_proceso || row.proceso || "Sin ID",
-                                SAF: String(row.saf || "000"),
-                                Procedimiento: row.tipo_de_procedimiento || row.tipo_procedimiento || row.procedimiento || "Otros",
-                                Ejercicio: String(row.ejercicio || row.anio || "2020"),
-                                Mes: !isNaN(mes) ? mes : 1,
-                                Proveedor: row.proveedor || row.adjudicatario || row.razon_social || "No Informado",
-                                Rubro: row.rubro || row.clase || row.descripcion || "Logística General",
-                                Monto: parseFloat(montoCrudo) || 0
-                            };
-                        });
+            try {
+                // Descargar el archivo Excel como un ArrayBuffer
+                const response = await fetch(excelUrl);
+                if (!response.ok) throw new Error("No se pudo encontrar el archivo " + excelUrl);
+                const arrayBuffer = await response.arrayBuffer();
 
-                        // 3. Quitar filas con monto 0 o errores de lectura
-                        rawData = rawData.filter(d => d.Monto > 0);
+                // Usar SheetJS para leer el archivo
+                const workbook = XLSX.read(arrayBuffer, { type: 'array', cellDates: true });
+                
+                // Asumimos que los datos están en la primera hoja
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                // Convertir la hoja a formato JSON
+                const resultsData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
 
-                        if (rawData.length === 0) {
-                            throw new Error("El archivo CSV se leyó, pero no se detectaron montos válidos.");
-                        }
-
-                        poblarSelectores(rawData);
-                        registrarEventos();
-                        actualizarTablero();
-
-                        document.getElementById('loading-state').classList.add('hidden');
-                        document.getElementById('dashboard-content').classList.remove('hidden');
-
-                    } catch (e) {
-                        console.error("Error al procesar el CSV:", e);
-                        mostrarErrorCSV(e.message);
+                // 1. Normalizar todas las columnas a minúsculas para que no haya errores
+                const data = resultsData.map(row => {
+                    let newRow = {};
+                    for (let key in row) {
+                        newRow[key.trim().toLowerCase()] = row[key];
                     }
-                },
-                error: function(err) {
-                    console.error("Error de descarga PapaParse:", err);
-                    mostrarErrorCSV("No se encontró el archivo CSV en el servidor.");
+                    return newRow;
+                });
+                
+                // 2. Mapear los datos reales a la estructura del tablero
+                rawData = data.map(row => {
+                    // Convertir formato de moneda Argentina a formato programación
+                    let montoCrudo = String(row.monto_adjudicado || row.monto || row.precio_total || "0");
+                    montoCrudo = montoCrudo.replace(/\$|\s/g, ''); // Saca signos $ y espacios
+                    if (montoCrudo.includes('.') && montoCrudo.includes(',')) {
+                        montoCrudo = montoCrudo.replace(/\./g, '').replace(',', '.'); // Ej: 1.500,50 -> 1500.50
+                    } else if (montoCrudo.includes(',')) {
+                        montoCrudo = montoCrudo.replace(',', '.'); // Ej: 1500,50 -> 1500.50
+                    }
+                    
+                    // Extraer el mes (Maneja fechas nativas de Excel o strings)
+                    let mes = 1;
+                    let fecha = row.fecha_adjudicacion || row.fecha_de_adjudicacion || row.fecha || '';
+                    if (fecha instanceof Date) {
+                        mes = fecha.getMonth() + 1;
+                    } else if (typeof fecha === 'string' && fecha) {
+                        if (fecha.includes('-')) {
+                            const partes = fecha.split('-');
+                            if (partes[0].length === 4) mes = parseInt(partes[1]);
+                        } else if (fecha.includes('/')) {
+                            const partes = fecha.split('/');
+                            mes = parseInt(partes[1]);
+                        }
+                    }
+                    
+                    return {
+                        Proceso: row.numero_proceso || row.proceso || "Sin ID",
+                        SAF: String(row.nro_saf || row.saf || "000").trim(),
+                        Procedimiento: row.tipo_de_procedimiento || row.tipo_procedimiento || row.procedimiento || "Otros",
+                        Ejercicio: String(row.ejercicio || row.anio || "2020").trim(),
+                        Mes: !isNaN(mes) ? mes : 1,
+                        Proveedor: row.descripcion_proveedor || row.proveedor || row.adjudicatario || row.razon_social || "No Informado",
+                        Rubro: row.rubros || row.rubro || row.clase || row.descripcion || "Logística General",
+                        Monto: parseFloat(montoCrudo) || 0
+                    };
+                });
+
+                // 3. Quitar filas con monto 0 o errores de lectura
+                rawData = rawData.filter(d => d.Monto > 0);
+
+                if (rawData.length === 0) {
+                    throw new Error("El archivo Excel se leyó, pero no se detectaron montos mayores a 0. Verifica los encabezados de tus columnas.");
                 }
-            });
+
+                poblarSelectores(rawData);
+                registrarEventos();
+                actualizarTablero();
+
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('dashboard-content').classList.remove('hidden');
+
+            } catch (error) {
+                console.error("Error al procesar el Excel:", error);
+                mostrarErrorExcel(error.message);
+            }
         });
 
-        function mostrarErrorCSV(mensajeExtra = "") {
+        function mostrarErrorExcel(mensajeExtra = "") {
             document.getElementById('loading-state').innerHTML = `
                 <div class="bg-red-50 p-6 rounded-lg border border-red-200 text-center max-w-md">
                     <h3 class="text-red-700 font-bold text-lg mb-2">Error de conexión de datos</h3>
-                    <p class="text-red-600 text-sm">No se pudo procesar el archivo <strong>defensa_compras_liviano.csv</strong>.</p>
+                    <p class="text-red-600 text-sm">No se pudo procesar el archivo <strong>Libro1.xlsx</strong>.</p>
                     <p class="text-red-500 text-xs mt-2">${mensajeExtra}</p>
+                    <p class="text-slate-500 text-xs mt-4">Asegurate de que el archivo esté subido en GitHub con el nombre exacto <strong>Libro1.xlsx</strong> respetando mayúsculas.</p>
                 </div>`;
         }
 
