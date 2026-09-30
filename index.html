@@ -23,13 +23,22 @@
         .scrollbar-thin::-webkit-scrollbar { width: 6px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        /* Transiciones para el Modo Experto */
         .experto-seccion { transition: all 0.5s ease-in-out; }
         .oculto-suave { opacity: 0; height: 0; overflow: hidden; margin: 0 !important; padding: 0 !important; border: none !important; }
+        /* Tooltip de Glosario */
+        .glosario { position: relative; cursor: help; border-bottom: 1px dashed; display: inline-block; }
+        .glosario .tooltip {
+            visibility: hidden; width: 250px; background-color: #0f172a; color: #fff; text-align: center;
+            border-radius: 6px; padding: 8px; position: absolute; z-index: 100;
+            bottom: 125%; left: 50%; transform: translateX(-50%);
+            opacity: 0; transition: opacity 0.3s; font-size: 11px; font-weight: normal; line-height: 1.4; border: 1px solid #334155;
+        }
+        .glosario:hover .tooltip { visibility: visible; opacity: 1; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
+    <!-- Header -->
     <header class="bg-slate-900 border-b border-slate-800 text-white shadow-md sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -37,11 +46,9 @@
                     <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide bg-blue-900 text-blue-200 border border-blue-700 mb-2">
                         Contar con Datos 2026 • Exploración Interactiva
                     </div>
-                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Monitor Logístico: Compras de Defensa</h1>
-                    <p class="text-slate-400 text-sm mt-1">Auditoría, inteligencia de datos (BI) y medición de riesgo estructural (2016-2026).</p>
+                    <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Monitor Logístico de Defensa</h1>
                 </div>
                 
-                <!-- BOTÓN MODO EXPERTO -->
                 <div class="flex items-center gap-3">
                     <button id="btn-toggle-modo" onclick="toggleModoExperto()" class="bg-slate-700 hover:bg-blue-600 text-white border border-slate-600 font-bold py-2 px-4 rounded-lg shadow transition-colors flex items-center gap-2 text-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
@@ -54,32 +61,40 @@
 
     <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-        <!-- Pantalla de Carga -->
-        <div id="loading-state" class="flex flex-col items-center justify-center py-24">
+        <!-- NARRATIVA DE APERTURA (Estilo USAspending) -->
+        <div class="mb-8 bg-gradient-to-br from-blue-900 via-slate-800 to-slate-900 text-white p-8 sm:p-10 rounded-2xl shadow-xl relative overflow-hidden border border-slate-700">
+            <div class="relative z-10 max-w-3xl">
+                <h2 class="text-3xl sm:text-4xl font-black mb-4 tracking-tight leading-tight text-white">¿Hacia dónde fluyen los recursos de la Defensa Nacional?</h2>
+                <p class="text-lg text-blue-100 leading-relaxed">
+                    Rastreá el camino del dinero público. Este monitor ciudadano audita millones de registros del sistema de contrataciones del Estado y los transforma en respuestas claras: <strong>quién compra, a quién se le adjudica y dónde se concentran los riesgos</strong>. Navegá por los datos o activá el modo experto para descubrir anomalías ocultas.
+                </p>
+            </div>
+        </div>
+
+        <div id="loading-state" class="flex flex-col items-center justify-center py-12">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-600 mb-4"></div>
-            <p class="text-slate-600 font-medium">Sintetizando ecosistema logístico y cargando modelos matemáticos...</p>
+            <p class="text-slate-600 font-medium">Conectando con la base de datos oficial...</p>
         </div>
 
         <div id="dashboard-content" class="hidden space-y-6">
 
-            <!-- Panel de Data Storytelling (Pregunta/Respuesta) -->
-            <section class="bg-gradient-to-r from-blue-900 to-slate-900 text-white p-6 rounded-xl shadow-md border border-blue-800">
+            <!-- Panel de Data Storytelling (Q&A) -->
+            <section class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex items-center gap-2 mb-4">
-                    <span class="bg-blue-500 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Data Storytelling</span>
-                    <h3 class="text-lg font-bold">Tres Hallazgos Clave del Período</h3>
+                    <span class="bg-blue-100 text-blue-800 border border-blue-200 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Hallazgos Principales</span>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-sm text-blue-50">
-                    <div class="bg-blue-950/60 p-4 rounded-lg border border-blue-700/50">
-                        <strong class="text-white block mb-2 font-bold text-base">¿El Estado gasta cada vez más en Defensa?</strong>
-                        No tanto como parece. Si ajustamos la inflación cambiando el <span class="group relative cursor-help border-b border-dashed border-blue-300 text-blue-200">filtro económico a Dólares<span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2 bg-slate-900 border border-slate-700 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal">Ajuste mediante deflactor histórico para eliminar la distorsión de la devaluación del peso argentino.</span></span>, el volumen de compra se aplanará, demostrando que el presupuesto logístico estructural se ha mantenido estable.
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-sm text-slate-700">
+                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                        <strong class="text-slate-900 block mb-2 font-bold text-base">¿El Estado gasta cada vez más?</strong>
+                        No tanto como parece. Si usamos el <span class="glosario border-slate-400 text-blue-600">Ajuste Económico a USD<span class="tooltip">Deflactor histórico que permite evaluar el gasto real aislando el efecto de la devaluación nominal del peso argentino.</span></span>, la "explosión" de presupuesto se aplana, revelando que el volumen logístico estructural se ha mantenido estable.
                     </div>
-                    <div class="bg-blue-950/60 p-4 rounded-lg border border-blue-700/50">
-                        <strong class="text-white block mb-2 font-bold text-base">¿Cuándo se gasta más plata?</strong>
-                        Hacia el tramo final del año. El mapa de calor (abajo a la derecha) evidencia incrementos drásticos en las contrataciones de último minuto impulsadas por el <span class="group relative cursor-help border-b border-dashed border-blue-300 text-blue-200">cierre del Ejercicio Presupuestario<span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2 bg-slate-900 border border-slate-700 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal">Período anual en el que las agencias estatales deben ejecutar su presupuesto antes de devolver los fondos sobrantes.</span></span>.
+                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                        <strong class="text-slate-900 block mb-2 font-bold text-base">¿Cuándo se gasta más plata?</strong>
+                        A último minuto. El mapa de calor evidencia incrementos drásticos en las contrataciones realizadas hacia el final de cada <span class="glosario border-slate-400 text-blue-600">Ejercicio Presupuestario<span class="tooltip">Período de un año (1° de enero al 31 de dic.) en el que se ejecuta el presupuesto asignado por ley.</span></span>.
                     </div>
-                    <div class="bg-blue-950/60 p-4 rounded-lg border border-blue-700/50">
-                        <strong class="text-white block mb-2 font-bold text-base">¿Hay compras sospechosas?</strong>
-                        Sí. Activando la Vista Experto, nuestra matriz algorítmica detecta expedientes de alta prioridad que combinan urgencia (<span class="group relative cursor-help border-b border-dashed border-blue-300 text-blue-200">Contratación Directa<span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2 bg-slate-900 border border-slate-700 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal">El Estado elige a un proveedor a dedo sin licitación pública, permitido solo en casos de urgencia extrema o exclusividad.</span></span>), un monto altísimo y un proveedor recurrente.
+                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-100">
+                        <strong class="text-slate-900 block mb-2 font-bold text-base">¿Hay compras de alto riesgo?</strong>
+                        Sí. Con la Vista Experta detectamos automáticamente expedientes que combinan <span class="glosario border-slate-400 text-blue-600">Contratación Directa<span class="tooltip">Mecanismo excepcional sin competencia pública abierta, permitido solo por urgencia o exclusividad tecnológica.</span></span>, urgencia, montos millonarios y un mismo proveedor recurrente.
                     </div>
                 </div>
             </section>
@@ -88,16 +103,15 @@
             <section class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex flex-col sm:flex-row items-center justify-between pb-3 mb-4 border-b border-slate-100 gap-2">
                     <h2 class="text-sm font-bold uppercase tracking-wider text-slate-600 flex items-center gap-2">
-                        <span>Filtros Dinámicos de Análisis</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                        Filtros Dinámicos
                     </h2>
-                    <button id="btn-reset" class="text-xs text-blue-600 hover:text-blue-800 font-bold transition bg-blue-50 px-3 py-1.5 rounded">
-                        Restablecer filtros
-                    </button>
+                    <button id="btn-reset" class="text-xs text-blue-600 hover:text-blue-800 font-bold transition bg-blue-50 px-3 py-1.5 rounded">Restablecer filtros</button>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">Fuerza / Organismo</label>
-                        <select id="filtro-fuerza" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Organismo (SAF)</label>
+                        <select id="filtro-fuerza" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-blue-500 p-2.5">
                             <option value="TODAS">Todas las Fuerzas</option>
                             <option value="381">Fuerza Aérea Argentina</option>
                             <option value="374">Ejército Argentino</option>
@@ -106,20 +120,20 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">Ejercicio</label>
-                        <select id="filtro-ejercicio" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Ejercicio / Año</label>
+                        <select id="filtro-ejercicio" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-blue-500 p-2.5">
                             <option value="TODOS">Todos los Años</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1">Procedimiento</label>
-                        <select id="filtro-procedimiento" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+                        <label class="block text-xs font-semibold text-slate-500 mb-1">Tipo de Procedimiento</label>
+                        <select id="filtro-procedimiento" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm rounded-lg focus:ring-blue-500 p-2.5">
                             <option value="TODOS">Todos los Procedimientos</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-blue-600 mb-1">Ajuste Económico (Deflactor)</label>
-                        <select id="filtro-moneda" class="w-full bg-blue-50 border border-blue-300 text-blue-800 font-semibold text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
+                        <select id="filtro-moneda" class="w-full bg-blue-50 border border-blue-300 text-blue-800 font-semibold text-sm rounded-lg focus:ring-blue-500 p-2.5">
                             <option value="ARS">Pesos Históricos (Nominales)</option>
                             <option value="USD">Dólares Históricos (Estimado)</option>
                         </select>
@@ -127,61 +141,84 @@
                 </div>
             </section>
 
-            <!-- Tarjetas de KPIs -->
+            <!-- Tarjetas de KPIs Principales -->
             <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-blue-600 shadow-sm">
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Monto Total Adjudicado</p>
-                    <p class="text-2xl font-black text-slate-800 mt-2 truncate" id="kpi-volumen">0</p>
-                    <!-- Dimensión de escala dinámica -->
-                    <p class="text-xs text-blue-600 font-medium mt-1 bg-blue-50 inline-block px-2 py-0.5 rounded" id="kpi-volumen-promedio">Promedio por exp: 0</p>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm">
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Expedientes</p>
-                    <p class="text-2xl font-black text-slate-800 mt-2" id="kpi-expedientes">0</p>
-                    <p class="text-xs text-slate-400 mt-1">Procesos de compra cerrados</p>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-blue-600 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Monto Total Adjudicado</p>
+                        <p class="text-2xl sm:text-3xl font-black text-slate-800 mt-1 truncate" id="kpi-volumen">0</p>
+                    </div>
+                    <p class="text-[11px] text-blue-700 font-bold mt-3 bg-blue-50 px-2 py-1 rounded inline-block w-max" id="kpi-volumen-promedio">Promedio por exp: 0</p>
                 </div>
                 
-                <!-- KPI HHI -->
-                <div id="card-hhi" class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm transition-colors relative">
-                    <div class="flex justify-between items-start">
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 w-full leading-tight">
-                            Riesgo de Dependencia 
-                            <br>
-                            <span class="group relative cursor-help border-b border-dashed border-slate-400 text-slate-400 text-[10px]">
-                                (Índice HHI)
-                                <span class="absolute top-full left-0 mt-2 w-56 p-2 bg-slate-900 text-white text-[11px] rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 font-normal">
-                                    El Índice Herfindahl-Hirschman mide la concentración del mercado. Un puntaje alto indica que el Estado depende de muy pocos proveedores para subsistir.
-                                </span>
-                            </span>
-                        </p>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Expedientes Finalizados</p>
+                        <p class="text-3xl font-black text-slate-800 mt-1" id="kpi-expedientes">0</p>
                     </div>
-                    <!-- Semáforo Verbal -->
-                    <p class="text-base font-black mt-2 leading-tight" id="kpi-hhi-etiqueta">Calculando...</p>
-                    <p class="text-[10px] text-slate-400 mt-1 font-mono" id="kpi-hhi-valor">Puntaje: 0</p>
+                    <p class="text-xs text-slate-400 mt-2">Procesos de compra cerrados con adjudicación.</p>
+                </div>
+                
+                <div id="card-hhi" class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm transition-colors relative flex flex-col justify-between">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 leading-tight">
+                            Riesgo de Dependencia 
+                            <span class="glosario border-slate-400 text-slate-400 text-[10px] ml-1">(HHI)<span class="tooltip">El Índice Herfindahl-Hirschman (HHI) es una medida aceptada internacionalmente para evaluar la concentración de mercado. Un índice alto indica monopolio o extrema dependencia estatal.</span></span>
+                        </p>
+                        <p class="text-lg font-black mt-1 leading-tight" id="kpi-hhi-etiqueta">Calculando...</p>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2 font-mono bg-slate-50 px-2 py-1 rounded inline-block w-max" id="kpi-hhi-valor">Puntaje: 0</p>
                 </div>
 
-                <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-slate-800 shadow-sm">
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Mayor Contratista</p>
-                    <p class="text-sm font-bold text-slate-800 mt-2 line-clamp-2 leading-tight" id="kpi-proveedor">-</p>
-                    <p class="text-xs text-slate-500 mt-2 font-mono bg-slate-100 px-2 py-1 rounded inline-block" id="kpi-proveedor-monto">0</p>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-slate-800 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Contratista Dominante</p>
+                        <p class="text-sm font-bold text-slate-800 mt-1 line-clamp-2 leading-tight" id="kpi-proveedor">-</p>
+                    </div>
+                    <p class="text-[11px] text-slate-600 font-mono font-bold mt-2 bg-slate-100 px-2 py-1 rounded inline-block w-max" id="kpi-proveedor-monto">0</p>
                 </div>
             </section>
 
-            <!-- VISTA EXPERTO: Matriz de Banderas Rojas -->
+            <!-- VISTA EXPERTA: Termómetros de Riesgo Adicionales (Proxy GDI) -->
+            <section class="experto-seccion oculto-suave grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div class="w-2/3">
+                        <h4 class="text-sm font-bold text-slate-800">Índice de Excepcionalidad</h4>
+                        <p class="text-xs text-slate-500 mt-1">Gasto canalizado por mecanismos cerrados sin licitación pública (Contrataciones Directas y Privadas). Proxy de transparencia.</p>
+                    </div>
+                    <div class="text-right">
+                        <span id="kpi-riesgo-directa-valor" class="text-2xl font-black">0%</span>
+                        <div id="kpi-riesgo-directa-etiqueta" class="text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center">Calculando</div>
+                    </div>
+                </div>
+                
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div class="w-2/3">
+                        <h4 class="text-sm font-bold text-slate-800">Estrés de Ejecución (Q4)</h4>
+                        <p class="text-xs text-slate-500 mt-1">Fondos adjudicados en los últimos 3 meses del año (Oct-Dic). Mide el riesgo de "apuro presupuestario" e ineficiencia logística.</p>
+                    </div>
+                    <div class="text-right">
+                        <span id="kpi-riesgo-q4-valor" class="text-2xl font-black">0%</span>
+                        <div id="kpi-riesgo-q4-etiqueta" class="text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center">Calculando</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- VISTA EXPERTA: Matriz de Banderas Rojas con BOTÓN -->
             <section class="experto-seccion oculto-suave bg-white rounded-xl border border-red-200 shadow-sm">
                 <div class="bg-red-50 border-b border-red-100 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-t-xl">
                     <div>
                         <h3 class="text-lg font-bold text-red-800 flex items-center gap-2">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                            Matriz de Banderas Rojas (Auditoría Automática)
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                            Matriz de Banderas Rojas (Red Flags)
                         </h3>
-                        <p class="text-xs text-red-600 mt-1">El algoritmo detecta riesgo por triple condición: <strong class="font-bold">Contratación Directa</strong> + <strong class="font-bold">Top 10% más caro</strong> + <strong class="font-bold">Proveedor Recurrente</strong>.</p>
+                        <p class="text-xs text-red-600 mt-1">El algoritmo detecta riesgo por triple condición: <strong class="font-bold">Proceso cerrado (Sin Licitación Pública)</strong> + <strong class="font-bold">Top 10% de mayor valor</strong> + <strong class="font-bold">Proveedor Recurrente</strong>.</p>
                     </div>
                     <div class="flex items-center gap-3">
                         <span class="text-sm font-bold text-red-700 bg-red-100 px-3 py-1 rounded-full border border-red-200" id="badge-alertas">0 Alertas</span>
-                        <button onclick="descargarAlertasCSV()" class="bg-red-700 hover:bg-red-800 text-white text-xs font-bold py-1.5 px-3 rounded shadow-sm transition inline-flex items-center gap-1">
+                        <button onclick="descargarAlertasCSV()" class="bg-red-700 hover:bg-red-800 text-white text-xs font-bold py-2 px-3 rounded shadow transition inline-flex items-center gap-1">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            Descargar CSV
+                            Exportar Matriz (CSV)
                         </button>
                     </div>
                 </div>
@@ -192,84 +229,77 @@
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Expediente</th>
                                 <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Proveedor</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Monto Final</th>
-                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Año</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Procedimiento</th>
+                                <th class="px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Monto Analizado</th>
                             </tr>
                         </thead>
                         <tbody id="tabla-alertas" class="bg-white divide-y divide-slate-100"></tbody>
                     </table>
                     <div id="msg-sin-alertas" class="p-8 text-center text-slate-500 text-sm hidden">
-                        No se detectaron expedientes de alto riesgo con los filtros actuales.
+                        El algoritmo no detectó expedientes de alto riesgo con la combinación de filtros actuales.
                     </div>
                 </div>
             </section>
 
-            <!-- VISTA SIMPLE: Análisis de Estacionalidad y Rubros -->
+            <!-- VISTA SIMPLE: Análisis Visual y Estacional -->
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Treemap -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <div class="mb-4">
                         <h3 class="text-base font-bold text-slate-800">Cajas de Gasto por Rubro (Treemap)</h3>
-                        <p class="text-xs text-slate-500 mt-1">Magnitud de adjudicaciones agrupadas por categoría funcional.</p>
+                        <p class="text-xs text-slate-500 mt-1">Magnitud del gasto agrupado. Cajas más grandes indican mayor volumen de dinero inyectado en esa categoría.</p>
                     </div>
                     <div id="treemap-chart" class="w-full h-72"></div>
                 </div>
 
+                <!-- Heatmap -->
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <div class="mb-4">
-                        <h3 class="text-base font-bold text-slate-800">Mapa de Calor Logístico (Estacionalidad)</h3>
-                        <p class="text-xs text-slate-500 mt-1">Intensidad del gasto mensual. Tonos más oscuros = mayor desembolso.</p>
+                        <h3 class="text-base font-bold text-slate-800">Mapa de Calor (Estacionalidad Operativa)</h3>
+                        <p class="text-xs text-slate-500 mt-1">Desembolso mensual por Fuerza. Tonos azules más oscuros representan picos masivos de ejecución presupuestaria.</p>
                     </div>
                     <div id="heatmap-chart" class="w-full h-72"></div>
                 </div>
             </section>
 
-            <!-- VISTA EXPERTO: Grafo de Redes -->
+            <!-- VISTA EXPERTA: Grafo de Redes -->
             <section class="experto-seccion oculto-suave bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-                <div class="mb-4 flex flex-col lg:flex-row justify-between items-start gap-4">
-                    <div>
-                        <h3 class="text-base font-bold text-slate-800">Topología del Ecosistema de Proveedores (Network Graph)</h3>
-                        <div class="text-xs text-slate-600 mt-2 bg-slate-50 border border-slate-200 p-3 rounded-md">
-                            <strong>Guía de lectura:</strong> Nodos azules = Fuerzas Armadas. Nodos grises = Top 15 Proveedores. <br>
-                            Cuanto más grueso es el vínculo, mayor es el monto adjudicado a ese proveedor. 
-                            <em>Fijate qué proveedor gris está conectado a más de una fuerza (centro de la telaraña): eso indica <strong>dependencia logística cruzada</strong>.</em>
-                        </div>
+                <div class="mb-4 flex flex-col justify-between items-start">
+                    <h3 class="text-base font-bold text-slate-800">Topología del Ecosistema de Proveedores (Network Graph)</h3>
+                    <div class="text-xs text-slate-700 mt-2 bg-blue-50 border border-blue-100 p-3 rounded-md w-full">
+                        <strong class="text-blue-800">📖 Guía rápida de lectura para auditoría:</strong> <br>
+                        • Nodos <strong>Azules</strong> = Organismos del Estado. Nodos <strong>Grises</strong> = Los 15 mayores contratistas en este recorte. <br>
+                        • El tamaño de la burbuja gris refleja el volumen total de dinero ganado por esa empresa. <br>
+                        • <strong>Punto ciego:</strong> Observá qué nodos grises están ubicados en el centro conectados a varias Fuerzas Azules a la vez. Eso evidencia proveedores de "dependencia cruzada" indispensables para el sistema.
                     </div>
                 </div>
-                <div class="relative w-full border border-slate-200 rounded-md" style="height: 450px;">
+                <div class="relative w-full border border-slate-200 rounded-md bg-slate-50" style="height: 450px;">
                     <div id="networkGraph"></div>
-                </div>
-            </section>
-
-            <!-- VISTA EXPERTO: Gráficos Base -->
-            <section class="experto-seccion oculto-suave grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 class="text-base font-bold text-slate-800 mb-4">Tasa de Modalidad de Contratación</h3>
-                    <div class="relative h-56 w-full">
-                        <canvas id="chartProcedimientos"></canvas>
-                    </div>
-                </div>
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 class="text-base font-bold text-slate-800 mb-4">Distribución del Presupuesto</h3>
-                    <div class="relative h-56 w-full flex justify-center">
-                        <canvas id="chartFuerzas"></canvas>
-                    </div>
                 </div>
             </section>
         </div>
     </main>
 
-    <!-- Nota Metodológica -->
-    <footer class="bg-slate-900 border-t border-slate-800 text-slate-400 text-xs py-8 mt-8">
-        <div class="max-w-7xl mx-auto px-4 space-y-4">
-            <div class="border-b border-slate-800 pb-4">
-                <h4 class="text-white font-bold uppercase tracking-wider mb-1">Nota Metodológica Analítica</h4>
-                <p class="leading-relaxed text-slate-400">
-                    <strong>Inflación y Deflactores:</strong> El ecosistema de compras en Argentina sufre una alta distorsión nominal. Para fines analíticos, se incorporó un interruptor que divide el gasto histórico por la cotización promedio anual del dólar mayorista en el BCRA. Esto permite evaluar el volumen logístico aislando el efecto devaluatorio. <br><br>
-                    <strong>Open Data Total:</strong> Todas las matrices de riesgo estructural pueden ser exportadas y auditadas localmente respetando los principios de accesibilidad ciudadana.
-                </p>
+    <!-- NOTA METODOLÓGICA AMPLIADA CON ESTÁNDARES -->
+    <footer class="bg-slate-900 border-t border-slate-800 text-slate-400 text-xs py-10 mt-8">
+        <div class="max-w-7xl mx-auto px-4 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 border-b border-slate-800 pb-6">
+                <div>
+                    <h4 class="text-white font-bold uppercase tracking-wider mb-2">Fundamentación de Riesgo y Estándares</h4>
+                    <p class="leading-relaxed text-slate-400 text-justify">
+                        La arquitectura de datos, el cálculo de excepcionalidad y los tableros de banderas rojas de esta plataforma dialogan directamente con las mejores prácticas internacionales recomendadas por el <strong>Open Contracting Data Standard (OCDS)</strong> y los principios de evaluación del <strong>Government Defence Integrity Index (GDI)</strong> diseñado por Transparencia Internacional para el sector seguridad. La visualización topológica permite rastrear anomalías en un formato adaptado al marco normativo logístico argentino.
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-white font-bold uppercase tracking-wider mb-2">Tratamiento Económico Nominal vs Constante</h4>
+                    <p class="leading-relaxed text-slate-400 text-justify">
+                        Dada la alta volatilidad inflacionaria de Argentina (2016-2026), presentar montos interanuales nominales carece de validez analítica estructural (fenómeno respaldado por metodologías de institutos como <strong>SIPRI</strong>). La herramienta provee un deflactor paramétrico que divide la serie de gasto histórico por la cotización promedio anual del Dólar Mayorista (BCRA), aislando así el efecto devaluatorio y permitiendo una comparación de volumen logístico real.
+                    </p>
+                </div>
             </div>
-            <div class="text-center text-slate-500">
-                Plataforma desarrollada para el certamen nacional de visualización de datos abiertos <strong>Contar con Datos 2026</strong>.
+            <div class="text-center text-slate-500 pt-2 flex flex-col items-center">
+                <span class="inline-block bg-slate-800 px-3 py-1 rounded text-[10px] mb-2 font-mono">100% Client-Side Processing • No Backend Storage</span>
+                Plataforma desarrollada de código abierto para el certamen nacional de innovación y visualización <strong>Contar con Datos 2026</strong>.
             </div>
         </div>
     </footer>
@@ -277,9 +307,8 @@
     <script>
         let rawDataOriginal = []; 
         let alertasGlobalesParaDescargar = []; 
-        let isExperto = false; // Estado del modo experto
+        let isExperto = false; 
         
-        let chartFuerzasInst = null, chartProcInst = null;
         let networkInst = null;
         let apexTreemap = null, apexHeatmap = null;
 
@@ -294,7 +323,6 @@
             "2021": 95, "2022": 130, "2023": 350, "2024": 950, "2025": 1150, "2026": 1300
         };
 
-        // Lógica para encender/apagar el Modo Experto
         function toggleModoExperto() {
             isExperto = !isExperto;
             const secciones = document.querySelectorAll('.experto-seccion');
@@ -313,22 +341,19 @@
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
-            // PLAN A (Velocidad máxima): Intenta leer un JSON procesado si existe.
-            // PLAN B (Seguridad): Si no está el JSON, cae a leer el archivo Excel Libro1.xlsx
             try {
                 const responseJSON = await fetch('datos_finales.json');
                 if (responseJSON.ok) {
                     const dataJSON = await responseJSON.json();
                     procesarDatos(dataJSON, true);
                 } else {
-                    throw new Error("No hay JSON, paso a leer Excel");
+                    throw new Error("Lectura JSON fallida");
                 }
             } catch (e) {
-                console.log("Cargando desde Excel (Libro1.xlsx)...");
                 try {
                     const excelUrl = 'Libro1.xlsx';
                     const response = await fetch(excelUrl);
-                    if (!response.ok) throw new Error("Tampoco se encontró Libro1.xlsx");
+                    if (!response.ok) throw new Error("Lectura Excel fallida");
                     const arrayBuffer = await response.arrayBuffer();
 
                     const workbook = XLSX.read(arrayBuffer, { type: 'array', cellDates: true });
@@ -336,9 +361,8 @@
                     const resultsData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
                     
                     procesarDatos(resultsData, false);
-                } catch (errorExcel) {
-                    console.error(errorExcel);
-                    document.getElementById('loading-state').innerHTML = `<p class="text-red-600 font-bold">Error: No se encontró ni 'datos_finales.json' ni 'Libro1.xlsx'. Subí al menos uno de los dos a tu repositorio.</p>`;
+                } catch (errorFatal) {
+                    document.getElementById('loading-state').innerHTML = `<p class="text-red-600 font-bold bg-red-100 p-4 rounded text-center">Error crítico: No se encontró la base de datos (Libro1.xlsx o datos_finales.json).</p>`;
                 }
             }
         });
@@ -409,12 +433,12 @@
         }
 
         function descargarAlertasCSV() {
-            if (alertasGlobalesParaDescargar.length === 0) return alert("No hay expedientes de riesgo con estos filtros.");
+            if (alertasGlobalesParaDescargar.length === 0) return alert("No hay expedientes de riesgo detectados con los filtros seleccionados.");
             const csvText = Papa.unparse(alertasGlobalesParaDescargar);
             const blob = new Blob(["\uFEFF"+csvText], { type: 'text/csv;charset=utf-8;' }); 
             const link = document.createElement("a");
             link.href = URL.createObjectURL(blob);
-            link.download = "matriz_riesgo_defensa.csv";
+            link.download = "auditoria_redflags_defensa.csv";
             link.click();
         }
 
@@ -437,7 +461,6 @@
             const fMoneda = document.getElementById('filtro-moneda').value;
 
             const monedaFormato = (fMoneda === 'USD') ? formatUSD : formatARS;
-            const monedaSimbolo = (fMoneda === 'USD') ? 'u$s' : '$';
 
             const datosProcesados = rawDataOriginal.map(d => {
                 let divisor = 1;
@@ -458,15 +481,27 @@
             
             document.getElementById('kpi-volumen').textContent = monedaFormato.format(totalMonto);
             document.getElementById('kpi-expedientes').textContent = cantidad.toLocaleString('es-AR');
-            document.getElementById('kpi-volumen-promedio').textContent = `Promedio por adjudicación: ${monedaFormato.format(promedio)}`;
+            document.getElementById('kpi-volumen-promedio').textContent = `Ticket Promedio: ${monedaFormato.format(promedio)}`;
 
             const provTotales = {};
             const provFrecuencia = {};
+            let montoDirectas = 0;
+            let montoQ4 = 0;
+
             filtrados.forEach(d => {
                 const provName = (d.Proveedor && d.Proveedor.trim() !== '') ? d.Proveedor : 'No Informado';
                 if(provName !== 'No Informado') {
                     provTotales[provName] = (provTotales[provName] || 0) + Number(d.Monto);
                     provFrecuencia[provName] = (provFrecuencia[provName] || 0) + 1;
+                }
+                
+                // Cálculo para Métricas de Riesgo GDI
+                const procStr = (d.Procedimiento || '').toLowerCase();
+                if (procStr.includes('directa') || procStr.includes('privada') || procStr.includes('excepción')) {
+                    montoDirectas += Number(d.Monto);
+                }
+                if (d.Mes >= 10) {
+                    montoQ4 += Number(d.Monto);
                 }
             });
 
@@ -474,37 +509,51 @@
             document.getElementById('kpi-proveedor').textContent = topProv ? topProv[0] : 'Sin datos';
             document.getElementById('kpi-proveedor-monto').textContent = topProv ? monedaFormato.format(topProv[1]) : '$0';
 
-            // HHI con Semáforo Verbal
+            // 1. Riesgo HHI Semáforo Verbal
             let hhi = 0;
-            if (totalMonto > 0) {
-                Object.values(provTotales).forEach(monto => { hhi += Math.pow((monto / totalMonto) * 100, 2); });
-            }
+            if (totalMonto > 0) { Object.values(provTotales).forEach(monto => { hhi += Math.pow((monto / totalMonto) * 100, 2); }); }
             
             const cardHhi = document.getElementById('card-hhi');
             const hhiLabel = document.getElementById('kpi-hhi-etiqueta');
-            const hhiValor = document.getElementById('kpi-hhi-valor');
-            
-            hhiValor.textContent = `Puntaje: ${hhi.toFixed(0)}`;
+            document.getElementById('kpi-hhi-valor').textContent = `Cifra exacta: ${hhi.toFixed(0)}`;
 
             if (hhi === 0) {
-                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm relative transition-colors";
-                hhiLabel.textContent = "Mercado sin datos";
-                hhiLabel.className = "text-base font-black mt-2 text-slate-600";
+                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm flex flex-col justify-between";
+                hhiLabel.textContent = "Sin datos";
+                hhiLabel.className = "text-lg font-black mt-1 leading-tight text-slate-500";
             } else if (hhi < 1500) {
-                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm relative transition-colors";
-                hhiLabel.textContent = "Competitivo";
-                hhiLabel.className = "text-base font-black mt-2 text-emerald-600";
+                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm flex flex-col justify-between";
+                hhiLabel.textContent = "Mercado Competitivo";
+                hhiLabel.className = "text-lg font-black mt-1 leading-tight text-emerald-600";
             } else if (hhi <= 2500) {
-                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-yellow-500 shadow-sm relative transition-colors";
+                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-yellow-500 shadow-sm flex flex-col justify-between";
                 hhiLabel.textContent = "Concentración Moderada";
-                hhiLabel.className = "text-base font-black mt-2 text-yellow-600";
+                hhiLabel.className = "text-lg font-black mt-1 leading-tight text-yellow-600";
             } else {
-                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-red-600 shadow-sm relative transition-colors";
-                hhiLabel.textContent = "Alto riesgo de dependencia";
-                hhiLabel.className = "text-base font-black mt-2 text-red-600";
+                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-red-600 shadow-sm flex flex-col justify-between";
+                hhiLabel.textContent = "Riesgo de Monopolio";
+                hhiLabel.className = "text-lg font-black mt-1 leading-tight text-red-600";
             }
 
-            // RED FLAGS
+            // 2. Termómetros de Riesgo (Proxy GDI)
+            const tasaDirectas = totalMonto > 0 ? (montoDirectas / totalMonto) * 100 : 0;
+            const tasaQ4 = totalMonto > 0 ? (montoQ4 / totalMonto) * 100 : 0;
+            
+            document.getElementById('kpi-riesgo-directa-valor').textContent = `${tasaDirectas.toFixed(1)}%`;
+            document.getElementById('kpi-riesgo-q4-valor').textContent = `${tasaQ4.toFixed(1)}%`;
+
+            const etiquetaDir = document.getElementById('kpi-riesgo-directa-etiqueta');
+            if(tasaDirectas < 20) { etiquetaDir.textContent = "BAJO RIESGO"; etiquetaDir.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-emerald-500"; }
+            else if(tasaDirectas < 40) { etiquetaDir.textContent = "RIESGO MEDIO"; etiquetaDir.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-yellow-500"; }
+            else { etiquetaDir.textContent = "ALERTA INSTITUCIONAL"; etiquetaDir.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-red-600"; }
+
+            const etiquetaQ4 = document.getElementById('kpi-riesgo-q4-etiqueta');
+            if(tasaQ4 < 25) { etiquetaQ4.textContent = "TENDENCIA SANA"; etiquetaQ4.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-emerald-500"; }
+            else if(tasaQ4 < 45) { etiquetaQ4.textContent = "ESTRÉS MODERADO"; etiquetaQ4.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-yellow-500"; }
+            else { etiquetaQ4.textContent = "ALTO ESTRÉS LOGÍSTICO"; etiquetaQ4.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-red-600"; }
+
+
+            // 3. RED FLAGS (Tabla)
             const montosArray = filtrados.map(d => Number(d.Monto)).sort((a, b) => a - b);
             const umbralCritico = percentil(montosArray, 0.90);
 
@@ -521,14 +570,14 @@
             const alertasVisibles = alertas.slice(0, 15);
 
             alertasGlobalesParaDescargar = alertas.map(a => ({
-                "ID Proceso": a.Proceso,
-                "Proveedor Adjudicado": a.Proveedor,
-                "Fuerza_SAF": safMap[a.SAF] || a.SAF,
+                "Expediente": a.Proceso,
+                "Proveedor": a.Proveedor,
+                "Organismo_SAF": safMap[a.SAF] || a.SAF,
                 "Procedimiento": a.Procedimiento,
-                "Rubro Gasto": a.Rubro,
+                "Categoría": a.Rubro,
                 "Año": a.Ejercicio,
                 "Monto Original (ARS)": a.MontoOriginal.toFixed(2),
-                "Monto Visualizado Pantalla": a.Monto.toFixed(2)
+                "Monto Filtrado Visual (USD/ARS)": a.Monto.toFixed(2)
             }));
 
             const tbody = document.getElementById('tabla-alertas');
@@ -550,16 +599,15 @@
                     tr.innerHTML = `
                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 border-l-4 border-l-red-500">${a.Proceso}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-semibold">${a.Proveedor}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500">${a.Procedimiento}</td>
                         <td class="px-6 py-4 whitespace-nowrap text-sm text-red-700 font-bold">${monedaFormato.format(a.Monto)}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-500">${a.Ejercicio}</td>
                     `;
                     tbody.appendChild(tr);
                 });
             }
 
-            renderGraficosChartJS(filtrados);
-            renderNetworkGraph(filtrados, monedaFormato);
             renderApexCharts(filtrados, monedaFormato);
+            if(isExperto) renderNetworkGraph(filtrados, monedaFormato);
         }
 
         // ---------- APEXCHARTS ----------
@@ -616,53 +664,6 @@
             if (apexHeatmap) { apexHeatmap.destroy(); }
             apexHeatmap = new ApexCharts(document.querySelector("#heatmap-chart"), optionsHeatmap);
             apexHeatmap.render();
-        }
-
-        // ---------- GRÁFICOS BASE (CHART.JS) ----------
-        function renderGraficosChartJS(datos) {
-            Chart.defaults.font.family = "'Inter', sans-serif";
-            
-            const fuerzasTotales = {};
-            datos.forEach(d => {
-                const f = safMap[d.SAF] || 'Otros';
-                fuerzasTotales[f] = (fuerzasTotales[f] || 0) + Number(d.Monto);
-            });
-            if(chartFuerzasInst) chartFuerzasInst.destroy();
-            chartFuerzasInst = new Chart(document.getElementById('chartFuerzas'), {
-                type: 'pie',
-                data: {
-                    labels: Object.keys(fuerzasTotales),
-                    datasets: [{
-                        data: Object.values(fuerzasTotales),
-                        backgroundColor: ['#059669', '#d97706', '#2563eb', '#8b5cf6'],
-                        borderWidth: 1
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
-            });
-
-            const procTotales = {};
-            datos.forEach(d => { 
-                const proc = d.Procedimiento || 'N/A';
-                procTotales[proc] = (procTotales[proc] || 0) + Number(d.Monto); 
-            });
-            if(chartProcInst) chartProcInst.destroy();
-            chartProcInst = new Chart(document.getElementById('chartProcedimientos'), {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(procTotales),
-                    datasets: [{
-                        data: Object.values(procTotales),
-                        backgroundColor: ['#10b981', '#f59e0b', '#ef4444', '#64748b'],
-                        borderRadius: 4
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { ticks: { display: false } } } 
-                }
-            });
         }
 
         // ---------- GRAFO DE REDES (VIS.JS) ----------
