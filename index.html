@@ -23,13 +23,15 @@
         .scrollbar-thin::-webkit-scrollbar { width: 6px; }
         .scrollbar-thin::-webkit-scrollbar-track { background: #f1f5f9; }
         .scrollbar-thin::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; }
+        /* Transiciones para el Modo Experto */
+        .experto-seccion { transition: all 0.5s ease-in-out; }
+        .oculto-suave { opacity: 0; height: 0; overflow: hidden; margin: 0 !important; padding: 0 !important; border: none !important; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 antialiased min-h-screen flex flex-col">
 
-    <header class="bg-slate-900 border-b border-slate-800 text-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+    <header class="bg-slate-900 border-b border-slate-800 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
             <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
                     <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide bg-blue-900 text-blue-200 border border-blue-700 mb-2">
@@ -38,9 +40,13 @@
                     <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight">Monitor Logístico: Compras de Defensa</h1>
                     <p class="text-slate-400 text-sm mt-1">Auditoría, inteligencia de datos (BI) y medición de riesgo estructural (2016-2026).</p>
                 </div>
-                <div class="flex flex-col items-start md:items-end text-xs text-slate-400">
-                    <span class="bg-slate-800 px-3 py-1 rounded-md mb-1 border border-slate-700"><strong>Fuente:</strong> COMPR.AR / ONC</span>
-                    <span class="bg-slate-800 px-3 py-1 rounded-md border border-slate-700"><strong>Datos Abiertos:</strong> datos.gob.ar</span>
+                
+                <!-- BOTÓN MODO EXPERTO -->
+                <div class="flex items-center gap-3">
+                    <button id="btn-toggle-modo" onclick="toggleModoExperto()" class="bg-slate-700 hover:bg-blue-600 text-white border border-slate-600 font-bold py-2 px-4 rounded-lg shadow transition-colors flex items-center gap-2 text-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                        <span id="texto-modo">Activar Vista Experto</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -51,38 +57,38 @@
         <!-- Pantalla de Carga -->
         <div id="loading-state" class="flex flex-col items-center justify-center py-24">
             <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-600 mb-4"></div>
-            <p class="text-slate-600 font-medium">Leyendo y procesando archivo Excel (Libro1.xlsx)...</p>
+            <p class="text-slate-600 font-medium">Sintetizando ecosistema logístico y cargando modelos matemáticos...</p>
         </div>
 
         <div id="dashboard-content" class="hidden space-y-6">
 
-            <!-- Panel de Data Storytelling -->
+            <!-- Panel de Data Storytelling (Pregunta/Respuesta) -->
             <section class="bg-gradient-to-r from-blue-900 to-slate-900 text-white p-6 rounded-xl shadow-md border border-blue-800">
-                <div class="flex items-center gap-2 mb-3">
+                <div class="flex items-center gap-2 mb-4">
                     <span class="bg-blue-500 text-white text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider">Data Storytelling</span>
-                    <h3 class="text-base font-bold">Tres Hallazgos Clave del Período</h3>
+                    <h3 class="text-lg font-bold">Tres Hallazgos Clave del Período</h3>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-blue-100">
-                    <div class="bg-blue-950/60 p-3.5 rounded-lg border border-blue-700/50">
-                        <strong class="text-white block mb-1 font-semibold">1. Distorsión Nominal vs Real</strong>
-                        Al ajustar el filtro económico a USD, la aparente "explosión" de gasto reciente se aplana, revelando que el volumen de compra estatal se ha mantenido estructuralmente estable.
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 text-sm text-blue-50">
+                    <div class="bg-blue-950/60 p-4 rounded-lg border border-blue-700/50">
+                        <strong class="text-white block mb-2 font-bold text-base">¿El Estado gasta cada vez más en Defensa?</strong>
+                        No tanto como parece. Si ajustamos la inflación cambiando el <span class="group relative cursor-help border-b border-dashed border-blue-300 text-blue-200">filtro económico a Dólares<span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2 bg-slate-900 border border-slate-700 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal">Ajuste mediante deflactor histórico para eliminar la distorsión de la devaluación del peso argentino.</span></span>, el volumen de compra se aplanará, demostrando que el presupuesto logístico estructural se ha mantenido estable.
                     </div>
-                    <div class="bg-blue-950/60 p-3.5 rounded-lg border border-blue-700/50">
-                        <strong class="text-white block mb-1 font-semibold">2. Estacionalidad de Cierre Fiscal</strong>
-                        El mapa de calor evidencia incrementos marcados en la ejecución de compras hacia el tramo final de los años fiscales, un patrón de gestión pública sistémico.
+                    <div class="bg-blue-950/60 p-4 rounded-lg border border-blue-700/50">
+                        <strong class="text-white block mb-2 font-bold text-base">¿Cuándo se gasta más plata?</strong>
+                        Hacia el tramo final del año. El mapa de calor (abajo a la derecha) evidencia incrementos drásticos en las contrataciones de último minuto impulsadas por el <span class="group relative cursor-help border-b border-dashed border-blue-300 text-blue-200">cierre del Ejercicio Presupuestario<span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2 bg-slate-900 border border-slate-700 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal">Período anual en el que las agencias estatales deben ejecutar su presupuesto antes de devolver los fondos sobrantes.</span></span>.
                     </div>
-                    <div class="bg-blue-950/60 p-3.5 rounded-lg border border-blue-700/50">
-                        <strong class="text-white block mb-1 font-semibold">3. Banderas Rojas y Concentración</strong>
-                        Las modalidades de excepción suelen concentrarse en partidas de urgencia, detectadas mediante una triple condicionalidad algorítmica y listas para su descarga.
+                    <div class="bg-blue-950/60 p-4 rounded-lg border border-blue-700/50">
+                        <strong class="text-white block mb-2 font-bold text-base">¿Hay compras sospechosas?</strong>
+                        Sí. Activando la Vista Experto, nuestra matriz algorítmica detecta expedientes de alta prioridad que combinan urgencia (<span class="group relative cursor-help border-b border-dashed border-blue-300 text-blue-200">Contratación Directa<span class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 p-2 bg-slate-900 border border-slate-700 text-white text-xs rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 font-normal">El Estado elige a un proveedor a dedo sin licitación pública, permitido solo en casos de urgencia extrema o exclusividad.</span></span>), un monto altísimo y un proveedor recurrente.
                     </div>
                 </div>
             </section>
 
-            <!-- Barra de Filtros Mejorada -->
+            <!-- Barra de Filtros -->
             <section class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
                 <div class="flex flex-col sm:flex-row items-center justify-between pb-3 mb-4 border-b border-slate-100 gap-2">
                     <h2 class="text-sm font-bold uppercase tracking-wider text-slate-600 flex items-center gap-2">
-                        <span>Filtros Dinámicos de Auditoría</span>
+                        <span>Filtros Dinámicos de Análisis</span>
                     </h2>
                     <button id="btn-reset" class="text-xs text-blue-600 hover:text-blue-800 font-bold transition bg-blue-50 px-3 py-1.5 rounded">
                         Restablecer filtros
@@ -111,7 +117,6 @@
                             <option value="TODOS">Todos los Procedimientos</option>
                         </select>
                     </div>
-                    <!-- NUEVO: Filtro Económico -->
                     <div>
                         <label class="block text-xs font-bold text-blue-600 mb-1">Ajuste Económico (Deflactor)</label>
                         <select id="filtro-moneda" class="w-full bg-blue-50 border border-blue-300 text-blue-800 font-semibold text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2.5">
@@ -125,28 +130,34 @@
             <!-- Tarjetas de KPIs -->
             <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-blue-600 shadow-sm">
-                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Monto Adjudicado</p>
+                    <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Monto Total Adjudicado</p>
                     <p class="text-2xl font-black text-slate-800 mt-2 truncate" id="kpi-volumen">0</p>
-                    <p class="text-xs text-slate-400 mt-1" id="kpi-volumen-sub">Presupuesto ejecutado</p>
+                    <!-- Dimensión de escala dinámica -->
+                    <p class="text-xs text-blue-600 font-medium mt-1 bg-blue-50 inline-block px-2 py-0.5 rounded" id="kpi-volumen-promedio">Promedio por exp: 0</p>
                 </div>
                 <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm">
                     <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Expedientes</p>
                     <p class="text-2xl font-black text-slate-800 mt-2" id="kpi-expedientes">0</p>
-                    <p class="text-xs text-slate-400 mt-1">Procesos finalizados</p>
+                    <p class="text-xs text-slate-400 mt-1">Procesos de compra cerrados</p>
                 </div>
                 
+                <!-- KPI HHI -->
                 <div id="card-hhi" class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm transition-colors relative">
-                    <div class="flex justify-between items-center">
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Riesgo Logístico (HHI)</p>
-                        <div class="relative group cursor-pointer">
-                            <span class="bg-slate-100 text-slate-600 font-bold px-1.5 py-0.5 rounded-full text-[10px] border border-slate-300">?</span>
-                            <div class="absolute bottom-full right-0 mb-2 w-56 p-2 bg-slate-900 text-white text-[11px] rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20">
-                                <b>Índice HHI:</b> Mide concentración. Menos de 1500 = Mercado Competitivo. Más de 2500 = Riesgo de alta dependencia de pocos proveedores.
-                            </div>
-                        </div>
+                    <div class="flex justify-between items-start">
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500 w-full leading-tight">
+                            Riesgo de Dependencia 
+                            <br>
+                            <span class="group relative cursor-help border-b border-dashed border-slate-400 text-slate-400 text-[10px]">
+                                (Índice HHI)
+                                <span class="absolute top-full left-0 mt-2 w-56 p-2 bg-slate-900 text-white text-[11px] rounded shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 font-normal">
+                                    El Índice Herfindahl-Hirschman mide la concentración del mercado. Un puntaje alto indica que el Estado depende de muy pocos proveedores para subsistir.
+                                </span>
+                            </span>
+                        </p>
                     </div>
-                    <p class="text-2xl font-black mt-2" id="kpi-hhi-valor">0</p>
-                    <p class="text-xs font-semibold mt-1 px-2 py-0.5 inline-block rounded-md" id="kpi-hhi-etiqueta">Calculando...</p>
+                    <!-- Semáforo Verbal -->
+                    <p class="text-base font-black mt-2 leading-tight" id="kpi-hhi-etiqueta">Calculando...</p>
+                    <p class="text-[10px] text-slate-400 mt-1 font-mono" id="kpi-hhi-valor">Puntaje: 0</p>
                 </div>
 
                 <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-slate-800 shadow-sm">
@@ -156,15 +167,15 @@
                 </div>
             </section>
 
-            <!-- Matriz de Banderas Rojas con BOTÓN DE DESCARGA -->
-            <section class="bg-white rounded-xl border border-red-200 shadow-sm overflow-hidden">
-                <div class="bg-red-50 border-b border-red-100 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <!-- VISTA EXPERTO: Matriz de Banderas Rojas -->
+            <section class="experto-seccion oculto-suave bg-white rounded-xl border border-red-200 shadow-sm">
+                <div class="bg-red-50 border-b border-red-100 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-t-xl">
                     <div>
                         <h3 class="text-lg font-bold text-red-800 flex items-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                            Matriz de Banderas Rojas (Red Flags)
+                            Matriz de Banderas Rojas (Auditoría Automática)
                         </h3>
-                        <p class="text-xs text-red-600 mt-1">Triple condición de riesgo: Contratación Directa + Top 10% más caro + Proveedor Recurrente.</p>
+                        <p class="text-xs text-red-600 mt-1">El algoritmo detecta riesgo por triple condición: <strong class="font-bold">Contratación Directa</strong> + <strong class="font-bold">Top 10% más caro</strong> + <strong class="font-bold">Proveedor Recurrente</strong>.</p>
                     </div>
                     <div class="flex items-center gap-3">
                         <span class="text-sm font-bold text-red-700 bg-red-100 px-3 py-1 rounded-full border border-red-200" id="badge-alertas">0 Alertas</span>
@@ -193,12 +204,12 @@
                 </div>
             </section>
 
-            <!-- Análisis de Estacionalidad y Rubros -->
+            <!-- VISTA SIMPLE: Análisis de Estacionalidad y Rubros -->
             <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <div class="mb-4">
                         <h3 class="text-base font-bold text-slate-800">Cajas de Gasto por Rubro (Treemap)</h3>
-                        <p class="text-xs text-slate-500 mt-1">Magnitud de adjudicaciones agrupadas por categoría.</p>
+                        <p class="text-xs text-slate-500 mt-1">Magnitud de adjudicaciones agrupadas por categoría funcional.</p>
                     </div>
                     <div id="treemap-chart" class="w-full h-72"></div>
                 </div>
@@ -206,27 +217,31 @@
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <div class="mb-4">
                         <h3 class="text-base font-bold text-slate-800">Mapa de Calor Logístico (Estacionalidad)</h3>
-                        <p class="text-xs text-slate-500 mt-1">Intensidad del gasto mensual con gradiente automático.</p>
+                        <p class="text-xs text-slate-500 mt-1">Intensidad del gasto mensual. Tonos más oscuros = mayor desembolso.</p>
                     </div>
                     <div id="heatmap-chart" class="w-full h-72"></div>
                 </div>
             </section>
 
-            <!-- Grafo de Redes -->
-            <section class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
-                <div class="mb-4 flex justify-between items-start">
+            <!-- VISTA EXPERTO: Grafo de Redes -->
+            <section class="experto-seccion oculto-suave bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col">
+                <div class="mb-4 flex flex-col lg:flex-row justify-between items-start gap-4">
                     <div>
                         <h3 class="text-base font-bold text-slate-800">Topología del Ecosistema de Proveedores (Network Graph)</h3>
-                        <p class="text-xs text-slate-500 mt-1">Nodos azules: Fuerzas Armadas. Nodos grises: Top 15 Proveedores.</p>
+                        <div class="text-xs text-slate-600 mt-2 bg-slate-50 border border-slate-200 p-3 rounded-md">
+                            <strong>Guía de lectura:</strong> Nodos azules = Fuerzas Armadas. Nodos grises = Top 15 Proveedores. <br>
+                            Cuanto más grueso es el vínculo, mayor es el monto adjudicado a ese proveedor. 
+                            <em>Fijate qué proveedor gris está conectado a más de una fuerza (centro de la telaraña): eso indica <strong>dependencia logística cruzada</strong>.</em>
+                        </div>
                     </div>
                 </div>
-                <div class="relative w-full border border-slate-200" style="height: 450px;">
+                <div class="relative w-full border border-slate-200 rounded-md" style="height: 450px;">
                     <div id="networkGraph"></div>
                 </div>
             </section>
 
-            <!-- Gráficos Base -->
-            <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- VISTA EXPERTO: Gráficos Base -->
+            <section class="experto-seccion oculto-suave grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                     <h3 class="text-base font-bold text-slate-800 mb-4">Tasa de Modalidad de Contratación</h3>
                     <div class="relative h-56 w-full">
@@ -234,7 +249,7 @@
                     </div>
                 </div>
                 <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                    <h3 class="text-base font-bold text-slate-800 mb-4">Fondos por Fuerza</h3>
+                    <h3 class="text-base font-bold text-slate-800 mb-4">Distribución del Presupuesto</h3>
                     <div class="relative h-56 w-full flex justify-center">
                         <canvas id="chartFuerzas"></canvas>
                     </div>
@@ -249,8 +264,8 @@
             <div class="border-b border-slate-800 pb-4">
                 <h4 class="text-white font-bold uppercase tracking-wider mb-1">Nota Metodológica Analítica</h4>
                 <p class="leading-relaxed text-slate-400">
-                    <strong>Inflación y Deflactores:</strong> El ecosistema de compras en Argentina (2016-2026) sufre una alta distorsión nominal. Para fines analíticos, se incorporó un interruptor que divide el gasto histórico nominal por la cotización promedio anual del dólar mayorista en el Banco Central (BCRA) para dicho ejercicio. Esto permite evaluar el volumen logístico estructural aislando el efecto devaluatorio. <br><br>
-                    <strong>Open Data:</strong> Todas las matrices de riesgo estructural pueden ser exportadas y auditadas localmente respetando los principios internacionales de datos abiertos.
+                    <strong>Inflación y Deflactores:</strong> El ecosistema de compras en Argentina sufre una alta distorsión nominal. Para fines analíticos, se incorporó un interruptor que divide el gasto histórico por la cotización promedio anual del dólar mayorista en el BCRA. Esto permite evaluar el volumen logístico aislando el efecto devaluatorio. <br><br>
+                    <strong>Open Data Total:</strong> Todas las matrices de riesgo estructural pueden ser exportadas y auditadas localmente respetando los principios de accesibilidad ciudadana.
                 </p>
             </div>
             <div class="text-center text-slate-500">
@@ -259,10 +274,10 @@
         </div>
     </footer>
 
-    <!-- Lógica Principal -->
     <script>
-        let rawDataOriginal = []; // Guarda los datos tal cual salen del Excel
-        let alertasGlobalesParaDescargar = []; // Guarda las alertas activas para el CSV
+        let rawDataOriginal = []; 
+        let alertasGlobalesParaDescargar = []; 
+        let isExperto = false; // Estado del modo experto
         
         let chartFuerzasInst = null, chartProcInst = null;
         let networkInst = null;
@@ -271,77 +286,107 @@
         const safMap = { "371": "EMCO", "374": "Ejército", "379": "Armada", "381": "Fuerza Aérea" };
         const mesesNombres = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
         
-        // Formateadores de moneda
         const formatARS = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
         const formatUSD = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
 
-        // Tasas estimadas del Dólar Promedio anual (2016-2026) para eliminar distorsión nominal
         const cotizacionDolarHistorico = {
             "2016": 15, "2017": 17, "2018": 28, "2019": 48, "2020": 70, 
             "2021": 95, "2022": 130, "2023": 350, "2024": 950, "2025": 1150, "2026": 1300
         };
 
+        // Lógica para encender/apagar el Modo Experto
+        function toggleModoExperto() {
+            isExperto = !isExperto;
+            const secciones = document.querySelectorAll('.experto-seccion');
+            const btnTexto = document.getElementById('texto-modo');
+            const btnToggle = document.getElementById('btn-toggle-modo');
+
+            if (isExperto) {
+                secciones.forEach(el => el.classList.remove('oculto-suave'));
+                btnTexto.textContent = "Apagar Vista Experto";
+                btnToggle.classList.replace('bg-slate-700', 'bg-blue-600');
+            } else {
+                secciones.forEach(el => el.classList.add('oculto-suave'));
+                btnTexto.textContent = "Activar Vista Experto";
+                btnToggle.classList.replace('bg-blue-600', 'bg-slate-700');
+            }
+        }
+
         document.addEventListener('DOMContentLoaded', async () => {
-            const excelUrl = 'Libro1.xlsx'; 
+            // PLAN A (Velocidad máxima): Intenta leer un JSON procesado si existe.
+            // PLAN B (Seguridad): Si no está el JSON, cae a leer el archivo Excel Libro1.xlsx
             try {
-                const response = await fetch(excelUrl);
-                if (!response.ok) throw new Error("No se pudo encontrar el archivo " + excelUrl);
-                const arrayBuffer = await response.arrayBuffer();
+                const responseJSON = await fetch('datos_finales.json');
+                if (responseJSON.ok) {
+                    const dataJSON = await responseJSON.json();
+                    procesarDatos(dataJSON, true);
+                } else {
+                    throw new Error("No hay JSON, paso a leer Excel");
+                }
+            } catch (e) {
+                console.log("Cargando desde Excel (Libro1.xlsx)...");
+                try {
+                    const excelUrl = 'Libro1.xlsx';
+                    const response = await fetch(excelUrl);
+                    if (!response.ok) throw new Error("Tampoco se encontró Libro1.xlsx");
+                    const arrayBuffer = await response.arrayBuffer();
 
-                const workbook = XLSX.read(arrayBuffer, { type: 'array', cellDates: true });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                const resultsData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                    const workbook = XLSX.read(arrayBuffer, { type: 'array', cellDates: true });
+                    const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const resultsData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+                    
+                    procesarDatos(resultsData, false);
+                } catch (errorExcel) {
+                    console.error(errorExcel);
+                    document.getElementById('loading-state').innerHTML = `<p class="text-red-600 font-bold">Error: No se encontró ni 'datos_finales.json' ni 'Libro1.xlsx'. Subí al menos uno de los dos a tu repositorio.</p>`;
+                }
+            }
+        });
 
-                const data = resultsData.map(row => {
+        function procesarDatos(rawData, isAlreadyClean) {
+            let data = rawData;
+            if (!isAlreadyClean) {
+                data = rawData.map(row => {
                     let newRow = {};
                     for (let key in row) newRow[key.trim().toLowerCase()] = row[key];
                     return newRow;
                 });
-                
-                rawDataOriginal = data.map(row => {
-                    let montoCrudo = String(row.monto_adjudicado || row.monto || row.precio_total || "0").replace(/\$|\s/g, '');
-                    if (montoCrudo.includes('.') && montoCrudo.includes(',')) {
-                        montoCrudo = montoCrudo.replace(/\./g, '').replace(',', '.');
-                    } else if (montoCrudo.includes(',')) {
-                        montoCrudo = montoCrudo.replace(',', '.');
-                    }
-                    
-                    let mes = 1;
-                    let fecha = row.fecha_adjudicacion || row.fecha_de_adjudicacion || row.fecha || '';
-                    if (fecha instanceof Date) { mes = fecha.getMonth() + 1; } 
-                    else if (typeof fecha === 'string' && fecha) {
-                        if (fecha.includes('-')) { const p = fecha.split('-'); if(p[0].length === 4) mes = parseInt(p[1]); } 
-                        else if (fecha.includes('/')) { const p = fecha.split('/'); mes = parseInt(p[1]); }
-                    }
-                    
-                    return {
-                        Proceso: row.numero_proceso || row.proceso || "Sin ID",
-                        SAF: String(row.nro_saf || row.saf || "000").trim(),
-                        Procedimiento: row.tipo_de_procedimiento || row.tipo_procedimiento || row.procedimiento || "Otros",
-                        Ejercicio: String(row.ejercicio || row.anio || "2020").trim(),
-                        Mes: !isNaN(mes) ? mes : 1,
-                        Proveedor: row.descripcion_proveedor || row.proveedor || row.adjudicatario || row.razon_social || "No Informado",
-                        Rubro: row.rubros || row.rubro || row.clase || row.descripcion || "Logística General",
-                        MontoOriginal: parseFloat(montoCrudo) || 0 // Guardamos el ARS original inmutable
-                    };
-                });
-
-                rawDataOriginal = rawDataOriginal.filter(d => d.MontoOriginal > 0);
-                if (rawDataOriginal.length === 0) throw new Error("Archivo vacío o sin montos.");
-
-                poblarSelectores(rawDataOriginal);
-                registrarEventos();
-                actualizarTablero();
-
-                document.getElementById('loading-state').classList.add('hidden');
-                document.getElementById('dashboard-content').classList.remove('hidden');
-
-            } catch (error) {
-                console.error(error);
-                document.getElementById('loading-state').innerHTML = `<p class="text-red-600 font-bold">Error: ${error.message}</p>`;
             }
-        });
+
+            rawDataOriginal = data.map(row => {
+                let montoCrudo = String(row.monto_adjudicado || row.monto || row.precio_total || "0").replace(/\$|\s/g, '');
+                if (montoCrudo.includes('.') && montoCrudo.includes(',')) montoCrudo = montoCrudo.replace(/\./g, '').replace(',', '.');
+                else if (montoCrudo.includes(',')) montoCrudo = montoCrudo.replace(',', '.');
+                
+                let mes = 1;
+                let fecha = row.fecha_adjudicacion || row.fecha_de_adjudicacion || row.fecha || '';
+                if (fecha instanceof Date) { mes = fecha.getMonth() + 1; } 
+                else if (typeof fecha === 'string' && fecha) {
+                    if (fecha.includes('-')) { const p = fecha.split('-'); if(p[0].length === 4) mes = parseInt(p[1]); } 
+                    else if (fecha.includes('/')) { const p = fecha.split('/'); mes = parseInt(p[1]); }
+                }
+                
+                return {
+                    Proceso: row.numero_proceso || row.proceso || "Sin ID",
+                    SAF: String(row.nro_saf || row.saf || "000").trim(),
+                    Procedimiento: row.tipo_de_procedimiento || row.tipo_procedimiento || row.procedimiento || "Otros",
+                    Ejercicio: String(row.ejercicio || row.anio || "2020").trim(),
+                    Mes: !isNaN(mes) ? mes : 1,
+                    Proveedor: row.descripcion_proveedor || row.proveedor || row.adjudicatario || row.razon_social || "No Informado",
+                    Rubro: row.rubros || row.rubro || row.clase || row.descripcion || "Logística General",
+                    MontoOriginal: parseFloat(montoCrudo) || 0
+                };
+            });
+
+            rawDataOriginal = rawDataOriginal.filter(d => d.MontoOriginal > 0);
+            
+            poblarSelectores(rawDataOriginal);
+            registrarEventos();
+            actualizarTablero();
+
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('dashboard-content').classList.remove('hidden');
+        }
 
         function poblarSelectores(datos) {
             const ejSelect = document.getElementById('filtro-ejercicio');
@@ -364,23 +409,13 @@
         }
 
         function descargarAlertasCSV() {
-            if (alertasGlobalesParaDescargar.length === 0) {
-                return alert("No hay expedientes riesgosos en los filtros actuales para descargar.");
-            }
-            
-            // Usar PapaParse para transformar JSON a texto CSV
+            if (alertasGlobalesParaDescargar.length === 0) return alert("No hay expedientes de riesgo con estos filtros.");
             const csvText = Papa.unparse(alertasGlobalesParaDescargar);
-            
-            // Crear el blob y simular el click para descargar
-            const blob = new Blob(["\uFEFF"+csvText], { type: 'text/csv;charset=utf-8;' }); // \uFEFF fuerza formato Excel/UTF8
+            const blob = new Blob(["\uFEFF"+csvText], { type: 'text/csv;charset=utf-8;' }); 
             const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-            link.setAttribute("href", url);
-            link.setAttribute("download", "matriz_riesgo_defensa.csv");
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
+            link.href = URL.createObjectURL(blob);
+            link.download = "matriz_riesgo_defensa.csv";
             link.click();
-            document.body.removeChild(link);
         }
 
         function percentil(arr, p) {
@@ -401,16 +436,12 @@
             const fProc = document.getElementById('filtro-procedimiento').value;
             const fMoneda = document.getElementById('filtro-moneda').value;
 
-            // Seleccionar formato de moneda según ajuste económico
             const monedaFormato = (fMoneda === 'USD') ? formatUSD : formatARS;
-            document.getElementById('kpi-volumen-sub').textContent = (fMoneda === 'USD') ? 'Dólar histórico equivalente' : 'ARS Nominales ejecutados';
+            const monedaSimbolo = (fMoneda === 'USD') ? 'u$s' : '$';
 
-            // Mapeamos los datos aplicando el filtro de ajuste económico
             const datosProcesados = rawDataOriginal.map(d => {
                 let divisor = 1;
-                if (fMoneda === 'USD') {
-                    divisor = cotizacionDolarHistorico[d.Ejercicio] || 1000; // Fallback
-                }
+                if (fMoneda === 'USD') divisor = cotizacionDolarHistorico[d.Ejercicio] || 1000;
                 return { ...d, Monto: d.MontoOriginal / divisor };
             });
 
@@ -420,10 +451,14 @@
                 (fProc === 'TODOS' || d.Procedimiento === fProc)
             );
 
-            // KPIs
+            // KPIs Volumen y Promedio
             const totalMonto = filtrados.reduce((a, b) => a + Number(b.Monto || 0), 0);
+            const cantidad = filtrados.length;
+            const promedio = cantidad > 0 ? (totalMonto / cantidad) : 0;
+            
             document.getElementById('kpi-volumen').textContent = monedaFormato.format(totalMonto);
-            document.getElementById('kpi-expedientes').textContent = filtrados.length.toLocaleString('es-AR');
+            document.getElementById('kpi-expedientes').textContent = cantidad.toLocaleString('es-AR');
+            document.getElementById('kpi-volumen-promedio').textContent = `Promedio por adjudicación: ${monedaFormato.format(promedio)}`;
 
             const provTotales = {};
             const provFrecuencia = {};
@@ -439,7 +474,7 @@
             document.getElementById('kpi-proveedor').textContent = topProv ? topProv[0] : 'Sin datos';
             document.getElementById('kpi-proveedor-monto').textContent = topProv ? monedaFormato.format(topProv[1]) : '$0';
 
-            // HHI
+            // HHI con Semáforo Verbal
             let hhi = 0;
             if (totalMonto > 0) {
                 Object.values(provTotales).forEach(monto => { hhi += Math.pow((monto / totalMonto) * 100, 2); });
@@ -447,24 +482,26 @@
             
             const cardHhi = document.getElementById('card-hhi');
             const hhiLabel = document.getElementById('kpi-hhi-etiqueta');
-            document.getElementById('kpi-hhi-valor').textContent = hhi.toFixed(0);
+            const hhiValor = document.getElementById('kpi-hhi-valor');
+            
+            hhiValor.textContent = `Puntaje: ${hhi.toFixed(0)}`;
 
             if (hhi === 0) {
-                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm relative";
-                hhiLabel.textContent = "Sin datos";
-                hhiLabel.className = "text-xs font-semibold mt-1 px-2 py-0.5 inline-block rounded-md bg-slate-100 text-slate-600";
+                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm relative transition-colors";
+                hhiLabel.textContent = "Mercado sin datos";
+                hhiLabel.className = "text-base font-black mt-2 text-slate-600";
             } else if (hhi < 1500) {
-                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm relative";
-                hhiLabel.textContent = "Bajo Riesgo (Competitivo)";
-                hhiLabel.className = "text-xs font-bold mt-1 px-2 py-0.5 inline-block rounded-md bg-emerald-100 text-emerald-800";
+                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm relative transition-colors";
+                hhiLabel.textContent = "Competitivo";
+                hhiLabel.className = "text-base font-black mt-2 text-emerald-600";
             } else if (hhi <= 2500) {
-                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-yellow-400 shadow-sm relative";
+                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-yellow-500 shadow-sm relative transition-colors";
                 hhiLabel.textContent = "Concentración Moderada";
-                hhiLabel.className = "text-xs font-bold mt-1 px-2 py-0.5 inline-block rounded-md bg-yellow-100 text-yellow-800";
+                hhiLabel.className = "text-base font-black mt-2 text-yellow-600";
             } else {
-                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-red-600 shadow-sm relative";
-                hhiLabel.textContent = "Riesgo Alto (Monopolio)";
-                hhiLabel.className = "text-xs font-bold mt-1 px-2 py-0.5 inline-block rounded-md bg-red-100 text-red-800";
+                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-red-600 shadow-sm relative transition-colors";
+                hhiLabel.textContent = "Alto riesgo de dependencia";
+                hhiLabel.className = "text-base font-black mt-2 text-red-600";
             }
 
             // RED FLAGS
@@ -475,25 +512,23 @@
                 const procStr = (d.Procedimiento || '').toLowerCase();
                 const esDirecta = procStr.includes('directa') || procStr.includes('privada') || procStr.includes('excepción');
                 const montoAlto = Number(d.Monto) >= umbralCritico && Number(d.Monto) > 0;
-                const provName = (d.Proveedor && d.Proveedor.trim() !== '') ? d.Proveedor : 'No Informado';
-                const proveedorRecurrente = provFrecuencia[provName] > 3;
+                const proveedorRecurrente = provFrecuencia[d.Proveedor] > 3;
 
-                return esDirecta && montoAlto && proveedorRecurrente && provName !== 'No Informado';
+                return esDirecta && montoAlto && proveedorRecurrente;
             });
 
             alertas.sort((a, b) => Number(b.Monto) - Number(a.Monto));
             const alertasVisibles = alertas.slice(0, 15);
 
-            // Guardar para descarga CSV y limpiar información interna irrelevante
             alertasGlobalesParaDescargar = alertas.map(a => ({
                 "ID Proceso": a.Proceso,
                 "Proveedor Adjudicado": a.Proveedor,
-                "Fuerza_SAF": a.SAF,
+                "Fuerza_SAF": safMap[a.SAF] || a.SAF,
                 "Procedimiento": a.Procedimiento,
                 "Rubro Gasto": a.Rubro,
                 "Año": a.Ejercicio,
                 "Monto Original (ARS)": a.MontoOriginal.toFixed(2),
-                "Monto Ajustado Pantalla": a.Monto.toFixed(2)
+                "Monto Visualizado Pantalla": a.Monto.toFixed(2)
             }));
 
             const tbody = document.getElementById('tabla-alertas');
@@ -555,7 +590,6 @@
             }
 
             const heatmapData = { "381": Array(12).fill(0), "374": Array(12).fill(0), "379": Array(12).fill(0), "371": Array(12).fill(0) };
-            
             datos.forEach(d => {
                 const fuerza_id = Object.keys(safMap).find(key => safMap[key] === d.SAF) || d.SAF;
                 if(heatmapData[fuerza_id] && d.Mes >= 1 && d.Mes <= 12) {
@@ -626,7 +660,7 @@
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     plugins: { legend: { display: false } },
-                    scales: { y: { ticks: { display: false } } } // Escondemos las etiquetas raras en Y
+                    scales: { y: { ticks: { display: false } } } 
                 }
             });
         }
