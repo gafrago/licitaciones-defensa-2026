@@ -328,7 +328,7 @@
                 </div>
             </div>
             <div class="text-center text-slate-500 pt-2 flex flex-col items-center">
-                <span class="inline-block bg-slate-800 px-3 py-1 rounded text-[10px] mb-2 font-mono">Arquitectura Client-Side • Privacy First</span>
+                <span class="inline-block bg-slate-800 px-3 py-1 rounded-text-[10px] mb-2 font-mono">Arquitectura Client-Side • Privacy First</span>
                 Plataforma desarrollada para el certamen nacional de innovación y visualización <strong>Contar con Datos 2026</strong>.
             </div>
         </div>
@@ -353,6 +353,36 @@
             "2016": 15, "2017": 17, "2018": 28, "2019": 48, "2020": 70, 
             "2021": 95, "2022": 130, "2023": 350, "2024": 950, "2025": 1150, "2026": 1300
         };
+
+        // FUNCIÓN REPARADORA DE MOJIBAKE (Corrige tildes rotas UTF-8 / Windows-1252)
+        function repararTexto(texto) {
+            if (!texto || typeof texto !== 'string') return texto;
+            if (!texto.includes('Ã') && !texto.includes('Â') && !texto.includes('â')) return texto.trim();
+            
+            return texto
+                .replace(/Ã|Ã\u0081/g, 'Á')
+                .replace(/Ã‰|Ã\u0089/g, 'É')
+                .replace(/Ã|Ã\u008D/g, 'Í')
+                .replace(/Ã“|Ã\u0093/g, 'Ó')
+                .replace(/Ãš|Ã\u009A/g, 'Ú')
+                .replace(/Ã‘|Ã\u0091/g, 'Ñ')
+                .replace(/Ã¡/g, 'á')
+                .replace(/Ã©/g, 'é')
+                .replace(/Ã­|Ã\u00AD/g, 'í')
+                .replace(/Ã³/g, 'ó')
+                .replace(/Ãº/g, 'ú')
+                .replace(/Ã±/g, 'ñ')
+                .replace(/Ã¼/g, 'ü')
+                .replace(/Ãœ|Ã\u009C/g, 'Ü')
+                .replace(/Â°/g, '°')
+                .replace(/Âº/g, 'º')
+                .replace(/Âª/g, 'ª')
+                .replace(/â€“/g, '–')
+                .replace(/â€”/g, '—')
+                .replace(/â€œ|â€\u009D/g, '"')
+                .replace(/â€™|â€˜/g, "'")
+                .trim();
+        }
 
         // Lógica de Pestañas (Tabs)
         function switchTab(tabId) {
@@ -427,13 +457,13 @@
                 }
                 
                 return {
-                    Proceso: row.numero_proceso || row.proceso || "Sin ID",
+                    Proceso: repararTexto(String(row.numero_proceso || row.proceso || "Sin ID")),
                     SAF: String(row.nro_saf || row.saf || "000").trim(),
-                    Procedimiento: row.tipo_de_procedimiento || row.tipo_procedimiento || row.procedimiento || "Otros",
+                    Procedimiento: repararTexto(String(row.tipo_de_procedimiento || row.tipo_procedimiento || row.procedimiento || "Otros")),
                     Ejercicio: String(row.ejercicio || row.anio || "2020").trim(),
                     Mes: !isNaN(mes) ? mes : 1,
-                    Proveedor: row.descripcion_proveedor || row.proveedor || row.adjudicatario || row.razon_social || "No Informado",
-                    Rubro: row.rubros || row.rubro || row.clase || row.descripcion || "Logística General",
+                    Proveedor: repararTexto(String(row.descripcion_proveedor || row.proveedor || row.adjudicatario || row.razon_social || "No Informado")),
+                    Rubro: repararTexto(String(row.rubros || row.rubro || row.clase || row.descripcion || "Logística General")),
                     MontoOriginal: parseFloat(montoCrudo) || 0
                 };
             });
@@ -533,7 +563,7 @@
                 
                 // Cálculo de Riesgo GDI
                 const procStr = (d.Procedimiento || '').toLowerCase();
-                if (procStr.includes('directa') || procStr.includes('privada') || procStr.includes('excepción')) {
+                if (procStr.includes('directa') || procStr.includes('privada') || procStr.includes('excepci')) {
                     montoDirectas += Number(d.Monto);
                 }
                 if (d.Mes >= 10) { montoQ4 += Number(d.Monto); }
@@ -592,7 +622,7 @@
 
             const alertas = filtrados.filter(d => {
                 const procStr = (d.Procedimiento || '').toLowerCase();
-                const esDirecta = procStr.includes('directa') || procStr.includes('privada') || procStr.includes('excepción');
+                const esDirecta = procStr.includes('directa') || procStr.includes('privada') || procStr.includes('excepci');
                 const montoAlto = Number(d.Monto) >= umbralCritico && Number(d.Monto) > 0;
                 const proveedorRecurrente = provFrecuencia[d.Proveedor] > 3;
 
@@ -639,7 +669,7 @@
                 });
             }
 
-            // AHORA SÍ: SE EJECUTAN TODOS LOS GRÁFICOS CORRECTAMENTE
+            // RENDERIZADO DE TODOS LOS COMPONENTES
             renderApexCharts(filtrados, monedaFormato);
             renderGraficosChartJS(filtrados, monedaFormato);
             renderNetworkGraph(filtrados, monedaFormato);
@@ -701,7 +731,7 @@
             apexHeatmap.render();
         }
 
-        // ---------- GRÁFICOS BASE (CHART.JS) RESTAURADOS ----------
+        // ---------- GRÁFICOS BASE (CHART.JS) ----------
         function renderGraficosChartJS(datos, formatter) {
             Chart.defaults.font.family = "'Inter', sans-serif";
             
@@ -755,7 +785,7 @@
                 },
                 options: {
                     responsive: true, 
-                    maintainAspectRatio: false,
+                    maintainAspectRatio: false, 
                     plugins: { 
                         legend: { display: false },
                         tooltip: {
