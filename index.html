@@ -212,13 +212,13 @@
                 <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                         <h3 class="text-base font-bold text-slate-800 mb-4">Tasa de Modalidad de Contratación</h3>
-                        <div class="relative h-56 w-full">
+                        <div class="relative h-64 w-full">
                             <canvas id="chartProcedimientos"></canvas>
                         </div>
                     </div>
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
                         <h3 class="text-base font-bold text-slate-800 mb-4">Fondos por Fuerza</h3>
-                        <div class="relative h-56 w-full flex justify-center">
+                        <div class="relative h-64 w-full flex justify-center">
                             <canvas id="chartFuerzas"></canvas>
                         </div>
                     </div>
@@ -367,8 +367,10 @@
             activeBtn.classList.remove('border-transparent', 'text-slate-500', 'font-medium');
             activeBtn.classList.add('border-blue-600', 'text-blue-600', 'font-bold');
 
-            // Forzar redibujado de gráficos para evitar que Vis.js o Apex colapsen al estar ocultos
+            // Forzar actualización de tamaño de los gráficos
             window.dispatchEvent(new Event('resize'));
+            if(chartProcInst) chartProcInst.resize();
+            if(chartFuerzasInst) chartFuerzasInst.resize();
             if(networkInst && tabId === 'tab-ecosistema') { 
                 setTimeout(() => { networkInst.fit(); }, 50);
             }
@@ -584,7 +586,6 @@
             else if(tasaQ4 < 45) { etiquetaQ4.textContent = "ESTRÉS MODERADO"; etiquetaQ4.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-yellow-500"; }
             else { etiquetaQ4.textContent = "ALTO ESTRÉS LOGÍSTICO"; etiquetaQ4.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-red-600"; }
 
-
             // 3. RED FLAGS (Tabla)
             const montosArray = filtrados.map(d => Number(d.Monto)).sort((a, b) => a - b);
             const umbralCritico = percentil(montosArray, 0.90);
@@ -638,7 +639,9 @@
                 });
             }
 
+            // AHORA SÍ: SE EJECUTAN TODOS LOS GRÁFICOS CORRECTAMENTE
             renderApexCharts(filtrados, monedaFormato);
+            renderGraficosChartJS(filtrados, monedaFormato);
             renderNetworkGraph(filtrados, monedaFormato);
         }
 
@@ -698,10 +701,11 @@
             apexHeatmap.render();
         }
 
-        // ---------- GRÁFICOS BASE (CHART.JS) ----------
-        function renderGraficosChartJS(datos) {
+        // ---------- GRÁFICOS BASE (CHART.JS) RESTAURADOS ----------
+        function renderGraficosChartJS(datos, formatter) {
             Chart.defaults.font.family = "'Inter', sans-serif";
             
+            // 1. Fondos por Fuerza (Pie Chart)
             const fuerzasTotales = {};
             datos.forEach(d => {
                 const f = safMap[d.SAF] || 'Otros';
@@ -718,9 +722,21 @@
                         borderWidth: 1
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    plugins: { 
+                        legend: { position: 'right' },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` ${ctx.label}: ${formatter.format(ctx.raw)}`
+                            }
+                        }
+                    } 
+                }
             });
 
+            // 2. Procedimientos (Bar Chart)
             const procTotales = {};
             datos.forEach(d => { 
                 const proc = d.Procedimiento || 'N/A';
@@ -738,9 +754,27 @@
                     }]
                 },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: { y: { ticks: { display: false } } } 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: ctx => ` Monto: ${formatter.format(ctx.raw)}`
+                            }
+                        }
+                    },
+                    scales: { 
+                        y: { 
+                            ticks: { 
+                                callback: v => {
+                                    if(v >= 1e6) return (v/1e6).toFixed(0) + 'M';
+                                    if(v >= 1e3) return (v/1e3).toFixed(0) + 'K';
+                                    return v;
+                                }
+                            } 
+                        } 
+                    } 
                 }
             });
         }
