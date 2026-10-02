@@ -65,10 +65,11 @@
             </div>
         </div>
 
-        <!-- PANTALLA DE CARGA -->
+        <!-- PANTALLA DE CARGA MEJORADA (Manejo de Ceros) -->
         <div id="loading-state" class="flex flex-col items-center justify-center py-12">
-            <div class="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-600 mb-4"></div>
-            <p class="text-slate-600 font-medium">Conectando con la base de datos oficial...</p>
+            <div id="spinner-icon" class="animate-spin rounded-full h-12 w-12 border-4 border-slate-200 border-t-blue-600 mb-4"></div>
+            <p id="spinner-text" class="text-slate-600 font-medium">Conectando con la base de datos oficial, aguarde por favor...</p>
+            <p id="spinner-subtext" class="text-slate-400 text-xs mt-2">La descompresión inicial puede demorar unos segundos dependiendo de su dispositivo.</p>
         </div>
 
         <div id="dashboard-content" class="hidden space-y-6">
@@ -141,9 +142,9 @@
                 <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-blue-600 shadow-sm flex flex-col justify-between">
                     <div>
                         <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Monto Total Adjudicado</p>
-                        <p class="text-2xl sm:text-3xl font-black text-slate-800 mt-1 truncate" id="kpi-volumen">0</p>
+                        <p class="text-2xl sm:text-3xl font-black text-slate-800 mt-1 truncate" id="kpi-volumen">Procesando...</p>
                     </div>
-                    <p class="text-[11px] text-blue-700 font-bold mt-3 bg-blue-50 px-2 py-1 rounded inline-block w-max" id="kpi-volumen-promedio">Promedio por exp: 0</p>
+                    <p class="text-[11px] text-blue-700 font-bold mt-3 bg-blue-50 px-2 py-1 rounded inline-block w-max" id="kpi-volumen-promedio">Promedio por exp: -</p>
                 </div>
                 
                 <div class="bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm flex flex-col justify-between">
@@ -160,7 +161,7 @@
                             Riesgo de Dependencia 
                             <span class="glosario border-slate-400 text-slate-400 text-[10px] ml-1">(HHI)<span class="tooltip">El Índice Herfindahl-Hirschman (HHI) evalúa la concentración de mercado. Un índice alto indica que el Estado le compra casi todo a 1 o 2 empresas.</span></span>
                         </p>
-                        <p class="text-lg font-black mt-1 leading-tight" id="kpi-hhi-etiqueta">Calculando...</p>
+                        <p class="text-lg font-black mt-1 leading-tight" id="kpi-hhi-etiqueta">Procesando...</p>
                     </div>
                     <p class="text-xs text-slate-500 mt-2 font-mono bg-slate-50 px-2 py-1 rounded inline-block w-max" id="kpi-hhi-valor">Puntaje: 0</p>
                 </div>
@@ -174,17 +175,17 @@
                 </div>
             </section>
 
-            <!-- TABS DE NAVEGACIÓN -->
+            <!-- TABS DE NAVEGACIÓN (Formal, Sin Emojis) -->
             <div class="border-b border-slate-300 mt-8 mb-4">
                 <nav class="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
                     <button onclick="switchTab('tab-distribucion')" id="btn-tab-distribucion" class="tab-btn border-blue-600 text-blue-600 whitespace-nowrap py-4 px-1 border-b-2 font-bold text-sm transition-colors">
-                        📊 Distribución y Estacionalidad
+                        Distribución y Estacionalidad
                     </button>
                     <button onclick="switchTab('tab-ecosistema')" id="btn-tab-ecosistema" class="tab-btn border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
-                        🕸️ Ecosistema y Monopolio
+                        Ecosistema y Monopolio
                     </button>
                     <button onclick="switchTab('tab-riesgo')" id="btn-tab-riesgo" class="tab-btn border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors">
-                        🚨 Auditoría de Riesgo (GDI)
+                        Auditoría de Riesgo e Integridad
                     </button>
                 </nav>
             </div>
@@ -231,7 +232,7 @@
                     <div class="mb-4 flex flex-col justify-between items-start">
                         <h3 class="text-base font-bold text-slate-800">Topología del Ecosistema de Proveedores</h3>
                         <div class="text-xs text-slate-700 mt-2 bg-blue-50 border border-blue-100 p-3 rounded-md w-full">
-                            <strong class="text-blue-800">📖 Guía de lectura para detectar dependencias cruzadas:</strong> <br>
+                            <strong class="text-blue-800">Guía de lectura para detectar dependencias cruzadas:</strong> <br>
                             • Nodos <strong>Azules</strong> = Fuerzas Armadas. Nodos <strong>Grises</strong> = Los 15 mayores contratistas. <br>
                             • El tamaño de la burbuja gris refleja el volumen total de dinero ganado por esa empresa. <br>
                             • <strong>Punto ciego logístico:</strong> Observá qué nodos grises están ubicados en el centro conectados a varias Fuerzas Azules a la vez. Eso evidencia proveedores indispensables.
@@ -243,9 +244,9 @@
                 </section>
             </div>
 
-            <!-- TAB 3: AUDITORÍA DE RIESGO -->
+            <!-- TAB 3: AUDITORÍA DE RIESGO E INTEGRIDAD -->
             <div id="tab-riesgo" class="tab-content hidden space-y-6">
-                <!-- Termómetros de Riesgo (Proxy GDI) -->
+                <!-- Termómetros de Riesgo -->
                 <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
                         <div class="w-2/3">
@@ -270,7 +271,7 @@
                     </div>
                 </section>
 
-                <!-- Matriz de Banderas Rojas con BOTÓN -->
+                <!-- Matriz de Banderas Rojas -->
                 <section class="bg-white rounded-xl border border-red-200 shadow-sm overflow-hidden">
                     <div class="bg-red-50 border-b border-red-100 p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-t-xl">
                         <div>
@@ -323,18 +324,18 @@
                 <div>
                     <h4 class="text-white font-bold uppercase tracking-wider mb-2">Tratamiento Económico Nominal vs Constante</h4>
                     <p class="leading-relaxed text-slate-400 text-justify">
-                        Dada la volatilidad macroeconómica (2016-2026), presentar montos nominales carece de validez analítica estructural a largo plazo (fenómeno respaldado por el <strong>SIPRI</strong>). La herramienta provee un deflactor paramétrico optativo que divide la serie de gasto histórico por la cotización promedio anual del Dólar Mayorista, aislando el efecto devaluatorio.
+                        Dada la volatilidad macroeconómica, presentar montos nominales en ventanas largas carece de validez analítica estructural (fenómeno respaldado por el <strong>SIPRI</strong>). La herramienta provee un deflactor paramétrico optativo que divide la serie de gasto histórico por la cotización promedio anual del Dólar Mayorista, aislando el efecto devaluatorio.
                     </p>
                 </div>
             </div>
             <div class="text-center text-slate-500 pt-2 flex flex-col items-center">
-                <span class="inline-block bg-slate-800 px-3 py-1 rounded text-[10px] mb-2 font-mono">Arquitectura Client-Side • Privacy First</span>
-                Plataforma desarrollada para el certamen nacional de innovación y visualización <strong>Contar con Datos 2026</strong>.
+                <span class="inline-block bg-slate-800 px-3 py-1 rounded text-[10px] mb-2 font-mono text-slate-300">Arquitectura Client-Side • Privacy First (Zero-Server-Tracking)</span>
+                Plataforma de código abierto desarrollada para el certamen de innovación ciudadana <strong>Contar con Datos 2026</strong>.
             </div>
         </div>
     </footer>
 
-    <!-- LOGICA JAVASCRIPT -->
+    <!-- LÓGICA JAVASCRIPT BLINDADA Y REPARADA -->
     <script>
         let rawDataOriginal = []; 
         let alertasGlobalesParaDescargar = []; 
@@ -354,37 +355,20 @@
             "2021": 95, "2022": 130, "2023": 350, "2024": 950, "2025": 1150, "2026": 1300
         };
 
-        // FUNCIÓN REPARADORA DE MOJIBAKE
+        // Corrector de codificación
         function repararTexto(texto) {
             if (!texto || typeof texto !== 'string') return texto;
             if (!texto.includes('Ã') && !texto.includes('Â') && !texto.includes('â')) return texto.trim();
-            
             return texto
-                .replace(/Ã|Ã\u0081/g, 'Á')
-                .replace(/Ã‰|Ã\u0089/g, 'É')
-                .replace(/Ã|Ã\u008D/g, 'Í')
-                .replace(/Ã“|Ã\u0093/g, 'Ó')
-                .replace(/Ãš|Ã\u009A/g, 'Ú')
-                .replace(/Ã‘|Ã\u0091/g, 'Ñ')
-                .replace(/Ã¡/g, 'á')
-                .replace(/Ã©/g, 'é')
-                .replace(/Ã­|Ã\u00AD/g, 'í')
-                .replace(/Ã³/g, 'ó')
-                .replace(/Ãº/g, 'ú')
-                .replace(/Ã±/g, 'ñ')
-                .replace(/Ã¼/g, 'ü')
-                .replace(/Ãœ|Ã\u009C/g, 'Ü')
-                .replace(/Â°/g, '°')
-                .replace(/Âº/g, 'º')
-                .replace(/Âª/g, 'ª')
-                .replace(/â€“/g, '–')
-                .replace(/â€”/g, '—')
-                .replace(/â€œ|â€\u009D/g, '"')
-                .replace(/â€™|â€˜/g, "'")
-                .trim();
+                .replace(/Ã|Ã\u0081/g, 'Á').replace(/Ã‰|Ã\u0089/g, 'É').replace(/Ã|Ã\u008D/g, 'Í')
+                .replace(/Ã“|Ã\u0093/g, 'Ó').replace(/Ãš|Ã\u009A/g, 'Ú').replace(/Ã‘|Ã\u0091/g, 'Ñ')
+                .replace(/Ã¡/g, 'á').replace(/Ã©/g, 'é').replace(/Ã­|Ã\u00AD/g, 'í')
+                .replace(/Ã³/g, 'ó').replace(/Ãº/g, 'ú').replace(/Ã±/g, 'ñ').replace(/Ã¼/g, 'ü').replace(/Ãœ|Ã\u009C/g, 'Ü')
+                .replace(/Â°/g, '°').replace(/Âº/g, 'º').replace(/Âª/g, 'ª')
+                .replace(/â€“/g, '–').replace(/â€”/g, '—').replace(/â€œ|â€\u009D/g, '"').replace(/â€™|â€˜/g, "'").trim();
         }
 
-        // FUNCIÓN GENERADORA DE TOOLTIP HTML PARA VIS.JS (Evita "b entre picos")
+        // Formateador de Tooltip Vis.js
         function htmlTitle(html) {
             const container = document.createElement("div");
             container.innerHTML = html;
@@ -395,7 +379,7 @@
             return container;
         }
 
-        // Lógica de Pestañas (Tabs)
+        // Lógica de Tabs
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => {
@@ -411,81 +395,104 @@
             window.dispatchEvent(new Event('resize'));
             if(chartProcInst) chartProcInst.resize();
             if(chartFuerzasInst) chartFuerzasInst.resize();
-            if(networkInst && tabId === 'tab-ecosistema') { 
-                setTimeout(() => { networkInst.fit(); }, 50);
-            }
+            if(networkInst && tabId === 'tab-ecosistema') { setTimeout(() => { networkInst.fit(); }, 50); }
+        }
+
+        // Manejador de Error Seguro
+        function mostrarErrorCritico(mensaje) {
+            document.getElementById('spinner-icon').classList.add('hidden');
+            document.getElementById('spinner-text').innerHTML = `
+                <div class="bg-red-50 border border-red-200 p-6 rounded-lg max-w-lg text-center mt-4">
+                    <h3 class="text-red-700 font-bold text-lg mb-2">Error de lectura de datos</h3>
+                    <p class="text-red-600 text-sm mb-4">El sistema no pudo procesar el archivo Excel o JSON.</p>
+                    <code class="bg-red-100 text-red-800 p-2 rounded text-xs block mb-4">${mensaje}</code>
+                    <p class="text-slate-600 text-xs">Asegúrese de haber subido el archivo <b>Libro1.xlsx</b> o <b>datos_finales.json</b> a su repositorio de GitHub.</p>
+                </div>
+            `;
+            document.getElementById('spinner-subtext').classList.add('hidden');
         }
 
         document.addEventListener('DOMContentLoaded', async () => {
             try {
+                // INTENTO 1: Carga JSON Rápida (Óptimo)
                 const responseJSON = await fetch('datos_finales.json');
                 if (responseJSON.ok) {
                     const dataJSON = await responseJSON.json();
                     procesarDatos(dataJSON, true);
-                } else {
-                    throw new Error("Lectura JSON fallida");
+                    return;
                 }
-            } catch (e) {
-                try {
-                    const excelUrl = 'Libro1.xlsx';
-                    const response = await fetch(excelUrl);
-                    if (!response.ok) throw new Error("Lectura Excel fallida");
+                
+                // INTENTO 2: Carga Excel Lenta (Fallback Seguro)
+                console.warn("JSON no encontrado. Intentando leer Libro1.xlsx...");
+                const excelUrl = 'Libro1.xlsx';
+                const response = await fetch(excelUrl);
+                if (response.ok) {
                     const arrayBuffer = await response.arrayBuffer();
-
                     const workbook = XLSX.read(arrayBuffer, { type: 'array', cellDates: true });
                     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
                     const resultsData = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
-                    
                     procesarDatos(resultsData, false);
-                } catch (errorFatal) {
-                    document.getElementById('loading-state').innerHTML = `<p class="text-red-600 font-bold bg-red-100 p-4 rounded text-center">Error crítico: No se encontró la base de datos (Libro1.xlsx o datos_finales.json).</p>`;
+                    return;
                 }
+                
+                throw new Error("Archivos de datos no encontrados en el servidor (404)");
+
+            } catch (error) {
+                console.error("Error global de inicialización:", error);
+                mostrarErrorCritico(error.message);
             }
         });
 
         function procesarDatos(rawData, isAlreadyClean) {
-            let data = rawData;
-            if (!isAlreadyClean) {
-                data = rawData.map(row => {
-                    let newRow = {};
-                    for (let key in row) newRow[key.trim().toLowerCase()] = row[key];
-                    return newRow;
-                });
-            }
-
-            rawDataOriginal = data.map(row => {
-                let montoCrudo = String(row.monto_adjudicado || row.monto || row.precio_total || "0").replace(/\$|\s/g, '');
-                if (montoCrudo.includes('.') && montoCrudo.includes(',')) montoCrudo = montoCrudo.replace(/\./g, '').replace(',', '.');
-                else if (montoCrudo.includes(',')) montoCrudo = montoCrudo.replace(',', '.');
-                
-                let mes = 1;
-                let fecha = row.fecha_adjudicacion || row.fecha_de_adjudicacion || row.fecha || '';
-                if (fecha instanceof Date) { mes = fecha.getMonth() + 1; } 
-                else if (typeof fecha === 'string' && fecha) {
-                    if (fecha.includes('-')) { const p = fecha.split('-'); if(p[0].length === 4) mes = parseInt(p[1]); } 
-                    else if (fecha.includes('/')) { const p = fecha.split('/'); mes = parseInt(p[1]); }
+            try {
+                let data = rawData;
+                if (!isAlreadyClean) {
+                    data = rawData.map(row => {
+                        let newRow = {};
+                        for (let key in row) newRow[key.trim().toLowerCase()] = row[key];
+                        return newRow;
+                    });
                 }
+
+                rawDataOriginal = data.map(row => {
+                    let montoCrudo = String(row.monto_adjudicado || row.monto || row.precio_total || "0").replace(/\$|\s/g, '');
+                    if (montoCrudo.includes('.') && montoCrudo.includes(',')) montoCrudo = montoCrudo.replace(/\./g, '').replace(',', '.');
+                    else if (montoCrudo.includes(',')) montoCrudo = montoCrudo.replace(',', '.');
+                    
+                    let mes = 1;
+                    let fecha = row.fecha_adjudicacion || row.fecha_de_adjudicacion || row.fecha || '';
+                    if (fecha instanceof Date) { mes = fecha.getMonth() + 1; } 
+                    else if (typeof fecha === 'string' && fecha) {
+                        if (fecha.includes('-')) { const p = fecha.split('-'); if(p[0].length === 4) mes = parseInt(p[1]); } 
+                        else if (fecha.includes('/')) { const p = fecha.split('/'); mes = parseInt(p[1]); }
+                    }
+                    
+                    return {
+                        Proceso: repararTexto(String(row.numero_proceso || row.proceso || "Sin ID")),
+                        SAF: String(row.nro_saf || row.saf || "000").trim(),
+                        Procedimiento: repararTexto(String(row.tipo_de_procedimiento || row.tipo_procedimiento || row.procedimiento || "Otros")),
+                        Ejercicio: String(row.ejercicio || row.anio || "2020").trim(),
+                        Mes: !isNaN(mes) ? mes : 1,
+                        Proveedor: repararTexto(String(row.descripcion_proveedor || row.proveedor || row.adjudicatario || row.razon_social || "No Informado")),
+                        Rubro: repararTexto(String(row.rubros || row.rubro || row.clase || row.descripcion || "Logística General")),
+                        MontoOriginal: parseFloat(montoCrudo) || 0
+                    };
+                });
+
+                rawDataOriginal = rawDataOriginal.filter(d => d.MontoOriginal > 0);
                 
-                return {
-                    Proceso: repararTexto(String(row.numero_proceso || row.proceso || "Sin ID")),
-                    SAF: String(row.nro_saf || row.saf || "000").trim(),
-                    Procedimiento: repararTexto(String(row.tipo_de_procedimiento || row.tipo_procedimiento || row.procedimiento || "Otros")),
-                    Ejercicio: String(row.ejercicio || row.anio || "2020").trim(),
-                    Mes: !isNaN(mes) ? mes : 1,
-                    Proveedor: repararTexto(String(row.descripcion_proveedor || row.proveedor || row.adjudicatario || row.razon_social || "No Informado")),
-                    Rubro: repararTexto(String(row.rubros || row.rubro || row.clase || row.descripcion || "Logística General")),
-                    MontoOriginal: parseFloat(montoCrudo) || 0
-                };
-            });
+                if (rawDataOriginal.length === 0) throw new Error("Se leyó el archivo pero no contiene valores numéricos válidos en la columna Monto.");
+                
+                poblarSelectores(rawDataOriginal);
+                registrarEventos();
+                actualizarTablero();
 
-            rawDataOriginal = rawDataOriginal.filter(d => d.MontoOriginal > 0);
-            
-            poblarSelectores(rawDataOriginal);
-            registrarEventos();
-            actualizarTablero();
-
-            document.getElementById('loading-state').classList.add('hidden');
-            document.getElementById('dashboard-content').classList.remove('hidden');
+                document.getElementById('loading-state').classList.add('hidden');
+                document.getElementById('dashboard-content').classList.remove('hidden');
+            } catch (err) {
+                console.error("Error procesando los datos:", err);
+                mostrarErrorCritico(err.message);
+            }
         }
 
         function poblarSelectores(datos) {
@@ -531,158 +538,160 @@
         }
 
         function actualizarTablero() {
-            const fFuerza = document.getElementById('filtro-fuerza').value;
-            const fEj = document.getElementById('filtro-ejercicio').value;
-            const fProc = document.getElementById('filtro-procedimiento').value;
-            const fMoneda = document.getElementById('filtro-moneda').value;
+            try {
+                const fFuerza = document.getElementById('filtro-fuerza').value;
+                const fEj = document.getElementById('filtro-ejercicio').value;
+                const fProc = document.getElementById('filtro-procedimiento').value;
+                const fMoneda = document.getElementById('filtro-moneda').value;
 
-            const monedaFormato = (fMoneda === 'USD') ? formatUSD : formatARS;
+                const monedaFormato = (fMoneda === 'USD') ? formatUSD : formatARS;
 
-            const datosProcesados = rawDataOriginal.map(d => {
-                let divisor = 1;
-                if (fMoneda === 'USD') divisor = cotizacionDolarHistorico[d.Ejercicio] || 1000;
-                return { ...d, Monto: d.MontoOriginal / divisor };
-            });
-
-            const filtrados = datosProcesados.filter(d => 
-                (fFuerza === 'TODAS' || d.SAF === fFuerza) &&
-                (fEj === 'TODOS' || String(d.Ejercicio) === fEj) &&
-                (fProc === 'TODOS' || d.Procedimiento === fProc)
-            );
-
-            const totalMonto = filtrados.reduce((a, b) => a + Number(b.Monto || 0), 0);
-            const cantidad = filtrados.length;
-            const promedio = cantidad > 0 ? (totalMonto / cantidad) : 0;
-            
-            document.getElementById('kpi-volumen').textContent = monedaFormato.format(totalMonto);
-            document.getElementById('kpi-expedientes').textContent = cantidad.toLocaleString('es-AR');
-            document.getElementById('kpi-volumen-promedio').textContent = `Ticket Promedio: ${monedaFormato.format(promedio)}`;
-
-            const provTotales = {};
-            const provFrecuencia = {};
-            let montoDirectas = 0;
-            let montoQ4 = 0;
-
-            filtrados.forEach(d => {
-                const provName = (d.Proveedor && d.Proveedor.trim() !== '') ? d.Proveedor : 'No Informado';
-                if(provName !== 'No Informado') {
-                    provTotales[provName] = (provTotales[provName] || 0) + Number(d.Monto);
-                    provFrecuencia[provName] = (provFrecuencia[provName] || 0) + 1;
-                }
-                
-                const procStr = (d.Procedimiento || '').toLowerCase();
-                if (procStr.includes('directa') || procStr.includes('privada') || procStr.includes('excepci')) {
-                    montoDirectas += Number(d.Monto);
-                }
-                if (d.Mes >= 10) { montoQ4 += Number(d.Monto); }
-            });
-
-            const topProv = Object.entries(provTotales).sort((a,b) => b[1]-a[1])[0];
-            document.getElementById('kpi-proveedor').textContent = topProv ? topProv[0] : 'Sin datos';
-            document.getElementById('kpi-proveedor-monto').textContent = topProv ? monedaFormato.format(topProv[1]) : '$0';
-
-            // 1. Riesgo HHI Semáforo Verbal
-            let hhi = 0;
-            if (totalMonto > 0) { Object.values(provTotales).forEach(monto => { hhi += Math.pow((monto / totalMonto) * 100, 2); }); }
-            
-            const cardHhi = document.getElementById('card-hhi');
-            const hhiLabel = document.getElementById('kpi-hhi-etiqueta');
-            document.getElementById('kpi-hhi-valor').textContent = `Cifra exacta: ${hhi.toFixed(0)}`;
-
-            if (hhi === 0) {
-                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm flex flex-col justify-between transition-colors";
-                hhiLabel.textContent = "Mercado sin datos";
-                hhiLabel.className = "text-lg font-black mt-1 leading-tight text-slate-500";
-            } else if (hhi < 1500) {
-                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm flex flex-col justify-between transition-colors";
-                hhiLabel.textContent = "Competitivo";
-                hhiLabel.className = "text-lg font-black mt-1 leading-tight text-emerald-600";
-            } else if (hhi <= 2500) {
-                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-yellow-500 shadow-sm flex flex-col justify-between transition-colors";
-                hhiLabel.textContent = "Concentración Moderada";
-                hhiLabel.className = "text-lg font-black mt-1 leading-tight text-yellow-600";
-            } else {
-                cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-red-600 shadow-sm flex flex-col justify-between transition-colors";
-                hhiLabel.textContent = "Alto riesgo (Monopolio)";
-                hhiLabel.className = "text-lg font-black mt-1 leading-tight text-red-600";
-            }
-
-            // 2. Termómetros de Riesgo (Proxy GDI)
-            const tasaDirectas = totalMonto > 0 ? (montoDirectas / totalMonto) * 100 : 0;
-            const tasaQ4 = totalMonto > 0 ? (montoQ4 / totalMonto) * 100 : 0;
-            
-            document.getElementById('kpi-riesgo-directa-valor').textContent = `${tasaDirectas.toFixed(1)}%`;
-            document.getElementById('kpi-riesgo-q4-valor').textContent = `${tasaQ4.toFixed(1)}%`;
-
-            const etiquetaDir = document.getElementById('kpi-riesgo-directa-etiqueta');
-            if(tasaDirectas < 20) { etiquetaDir.textContent = "BAJO RIESGO"; etiquetaDir.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-emerald-500"; }
-            else if(tasaDirectas < 40) { etiquetaDir.textContent = "RIESGO MEDIO"; etiquetaDir.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-yellow-500"; }
-            else { etiquetaDir.textContent = "ALERTA INSTITUCIONAL"; etiquetaDir.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-red-600"; }
-
-            const etiquetaQ4 = document.getElementById('kpi-riesgo-q4-etiqueta');
-            if(tasaQ4 < 25) { etiquetaQ4.textContent = "TENDENCIA SANA"; etiquetaQ4.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-emerald-500"; }
-            else if(tasaQ4 < 45) { etiquetaQ4.textContent = "ESTRÉS MODERADO"; etiquetaQ4.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-yellow-500"; }
-            else { etiquetaQ4.textContent = "ALTO ESTRÉS LOGÍSTICO"; etiquetaQ4.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-red-600"; }
-
-            // 3. RED FLAGS (Tabla)
-            const montosArray = filtrados.map(d => Number(d.Monto)).sort((a, b) => a - b);
-            const umbralCritico = percentil(montosArray, 0.90);
-
-            const alertas = filtrados.filter(d => {
-                const procStr = (d.Procedimiento || '').toLowerCase();
-                const esDirecta = procStr.includes('directa') || procStr.includes('privada') || procStr.includes('excepci');
-                const montoAlto = Number(d.Monto) >= umbralCritico && Number(d.Monto) > 0;
-                const proveedorRecurrente = provFrecuencia[d.Proveedor] > 3;
-
-                return esDirecta && montoAlto && proveedorRecurrente;
-            });
-
-            alertas.sort((a, b) => Number(b.Monto) - Number(a.Monto));
-            const alertasVisibles = alertas.slice(0, 15);
-
-            alertasGlobalesParaDescargar = alertas.map(a => ({
-                "Expediente": a.Proceso,
-                "Proveedor": a.Proveedor,
-                "Organismo_SAF": safMap[a.SAF] || a.SAF,
-                "Procedimiento": a.Procedimiento,
-                "Categoría": a.Rubro,
-                "Año": a.Ejercicio,
-                "Monto Original (ARS)": a.MontoOriginal.toFixed(2),
-                "Monto Filtrado Visual (USD/ARS)": a.Monto.toFixed(2)
-            }));
-
-            const tbody = document.getElementById('tabla-alertas');
-            const msgVacio = document.getElementById('msg-sin-alertas');
-            document.getElementById('badge-alertas').textContent = `${alertas.length} Alertas Activas`;
-            
-            tbody.innerHTML = '';
-            
-            if (alertas.length === 0) {
-                msgVacio.classList.remove('hidden');
-                tbody.parentNode.classList.add('hidden');
-            } else {
-                msgVacio.classList.add('hidden');
-                tbody.parentNode.classList.remove('hidden');
-                
-                alertasVisibles.forEach(a => {
-                    const tr = document.createElement('tr');
-                    tr.className = "hover:bg-slate-50 transition-colors";
-                    tr.innerHTML = `
-                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 border-l-4 border-l-red-500">${a.Proceso}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-semibold">${a.Proveedor}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500">${a.Procedimiento}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-red-700 font-bold">${monedaFormato.format(a.Monto)}</td>
-                    `;
-                    tbody.appendChild(tr);
+                const datosProcesados = rawDataOriginal.map(d => {
+                    let divisor = 1;
+                    if (fMoneda === 'USD') divisor = cotizacionDolarHistorico[d.Ejercicio] || 1000;
+                    return { ...d, Monto: d.MontoOriginal / divisor };
                 });
-            }
 
-            renderApexCharts(filtrados, monedaFormato);
-            renderGraficosChartJS(filtrados, monedaFormato);
-            renderNetworkGraph(filtrados, monedaFormato);
+                const filtrados = datosProcesados.filter(d => 
+                    (fFuerza === 'TODAS' || d.SAF === fFuerza) &&
+                    (fEj === 'TODOS' || String(d.Ejercicio) === fEj) &&
+                    (fProc === 'TODOS' || d.Procedimiento === fProc)
+                );
+
+                const totalMonto = filtrados.reduce((a, b) => a + Number(b.Monto || 0), 0);
+                const cantidad = filtrados.length;
+                const promedio = cantidad > 0 ? (totalMonto / cantidad) : 0;
+                
+                document.getElementById('kpi-volumen').textContent = monedaFormato.format(totalMonto);
+                document.getElementById('kpi-expedientes').textContent = cantidad.toLocaleString('es-AR');
+                document.getElementById('kpi-volumen-promedio').textContent = `Ticket Promedio: ${monedaFormato.format(promedio)}`;
+
+                const provTotales = {};
+                const provFrecuencia = {};
+                let montoDirectas = 0;
+                let montoQ4 = 0;
+
+                filtrados.forEach(d => {
+                    const provName = (d.Proveedor && d.Proveedor.trim() !== '') ? d.Proveedor : 'No Informado';
+                    if(provName !== 'No Informado') {
+                        provTotales[provName] = (provTotales[provName] || 0) + Number(d.Monto);
+                        provFrecuencia[provName] = (provFrecuencia[provName] || 0) + 1;
+                    }
+                    
+                    const procStr = (d.Procedimiento || '').toLowerCase();
+                    if (procStr.includes('directa') || procStr.includes('privada') || procStr.includes('excepci')) {
+                        montoDirectas += Number(d.Monto);
+                    }
+                    if (d.Mes >= 10) { montoQ4 += Number(d.Monto); }
+                });
+
+                const topProv = Object.entries(provTotales).sort((a,b) => b[1]-a[1])[0];
+                document.getElementById('kpi-proveedor').textContent = topProv ? topProv[0] : 'Sin datos';
+                document.getElementById('kpi-proveedor-monto').textContent = topProv ? monedaFormato.format(topProv[1]) : '$0';
+
+                // HHI
+                let hhi = 0;
+                if (totalMonto > 0) { Object.values(provTotales).forEach(monto => { hhi += Math.pow((monto / totalMonto) * 100, 2); }); }
+                
+                const cardHhi = document.getElementById('card-hhi');
+                const hhiLabel = document.getElementById('kpi-hhi-etiqueta');
+                document.getElementById('kpi-hhi-valor').textContent = `Cifra exacta: ${hhi.toFixed(0)}`;
+
+                if (hhi === 0) {
+                    cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 shadow-sm flex flex-col justify-between transition-colors";
+                    hhiLabel.textContent = "Mercado sin datos";
+                    hhiLabel.className = "text-lg font-black mt-1 leading-tight text-slate-500";
+                } else if (hhi < 1500) {
+                    cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-emerald-500 shadow-sm flex flex-col justify-between transition-colors";
+                    hhiLabel.textContent = "Competitivo";
+                    hhiLabel.className = "text-lg font-black mt-1 leading-tight text-emerald-600";
+                } else if (hhi <= 2500) {
+                    cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-yellow-500 shadow-sm flex flex-col justify-between transition-colors";
+                    hhiLabel.textContent = "Concentración Moderada";
+                    hhiLabel.className = "text-lg font-black mt-1 leading-tight text-yellow-600";
+                } else {
+                    cardHhi.className = "bg-white p-5 rounded-xl border border-slate-200 border-l-4 border-l-red-600 shadow-sm flex flex-col justify-between transition-colors";
+                    hhiLabel.textContent = "Alto riesgo (Monopolio)";
+                    hhiLabel.className = "text-lg font-black mt-1 leading-tight text-red-600";
+                }
+
+                // GDI
+                const tasaDirectas = totalMonto > 0 ? (montoDirectas / totalMonto) * 100 : 0;
+                const tasaQ4 = totalMonto > 0 ? (montoQ4 / totalMonto) * 100 : 0;
+                
+                document.getElementById('kpi-riesgo-directa-valor').textContent = `${tasaDirectas.toFixed(1)}%`;
+                document.getElementById('kpi-riesgo-q4-valor').textContent = `${tasaQ4.toFixed(1)}%`;
+
+                const etiquetaDir = document.getElementById('kpi-riesgo-directa-etiqueta');
+                if(tasaDirectas < 20) { etiquetaDir.textContent = "BAJO RIESGO"; etiquetaDir.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-emerald-500"; }
+                else if(tasaDirectas < 40) { etiquetaDir.textContent = "RIESGO MEDIO"; etiquetaDir.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-yellow-500"; }
+                else { etiquetaDir.textContent = "ALERTA INSTITUCIONAL"; etiquetaDir.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-red-600"; }
+
+                const etiquetaQ4 = document.getElementById('kpi-riesgo-q4-etiqueta');
+                if(tasaQ4 < 25) { etiquetaQ4.textContent = "TENDENCIA SANA"; etiquetaQ4.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-emerald-500"; }
+                else if(tasaQ4 < 45) { etiquetaQ4.textContent = "ESTRÉS MODERADO"; etiquetaQ4.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-yellow-500"; }
+                else { etiquetaQ4.textContent = "ALTO ESTRÉS LOGÍSTICO"; etiquetaQ4.className = "text-[10px] font-bold mt-1 px-2 py-0.5 rounded text-white text-center bg-red-600"; }
+
+                // Banderas Rojas
+                const montosArray = filtrados.map(d => Number(d.Monto)).sort((a, b) => a - b);
+                const umbralCritico = percentil(montosArray, 0.90);
+
+                const alertas = filtrados.filter(d => {
+                    const procStr = (d.Procedimiento || '').toLowerCase();
+                    const esDirecta = procStr.includes('directa') || procStr.includes('privada') || procStr.includes('excepci');
+                    const montoAlto = Number(d.Monto) >= umbralCritico && Number(d.Monto) > 0;
+                    const proveedorRecurrente = provFrecuencia[d.Proveedor] > 3;
+                    return esDirecta && montoAlto && proveedorRecurrente;
+                });
+
+                alertas.sort((a, b) => Number(b.Monto) - Number(a.Monto));
+                const alertasVisibles = alertas.slice(0, 15);
+
+                alertasGlobalesParaDescargar = alertas.map(a => ({
+                    "Expediente": a.Proceso,
+                    "Proveedor": a.Proveedor,
+                    "Organismo_SAF": safMap[a.SAF] || a.SAF,
+                    "Procedimiento": a.Procedimiento,
+                    "Categoría": a.Rubro,
+                    "Año": a.Ejercicio,
+                    "Monto Original (ARS)": a.MontoOriginal.toFixed(2),
+                    "Monto Filtrado Visual (USD/ARS)": a.Monto.toFixed(2)
+                }));
+
+                const tbody = document.getElementById('tabla-alertas');
+                const msgVacio = document.getElementById('msg-sin-alertas');
+                document.getElementById('badge-alertas').textContent = `${alertas.length} Alertas Activas`;
+                
+                tbody.innerHTML = '';
+                if (alertas.length === 0) {
+                    msgVacio.classList.remove('hidden');
+                    tbody.parentNode.classList.add('hidden');
+                } else {
+                    msgVacio.classList.add('hidden');
+                    tbody.parentNode.classList.remove('hidden');
+                    alertasVisibles.forEach(a => {
+                        const tr = document.createElement('tr');
+                        tr.className = "hover:bg-slate-50 transition-colors";
+                        tr.innerHTML = `
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 border-l-4 border-l-red-500">${a.Proceso}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-700 font-semibold">${a.Proveedor}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-xs text-slate-500">${a.Procedimiento}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-red-700 font-bold">${monedaFormato.format(a.Monto)}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                }
+
+                renderApexCharts(filtrados, monedaFormato);
+                renderGraficosChartJS(filtrados, monedaFormato);
+                renderNetworkGraph(filtrados, monedaFormato);
+                
+            } catch (err) {
+                console.error("Error crítico durante la actualización visual:", err);
+                alert("Ocurrió un error temporal al filtrar los datos. Por favor, recargue la página.");
+            }
         }
 
-        // ---------- APEXCHARTS ----------
         function renderApexCharts(datos, formatter) {
             const rubroTotales = {};
             datos.forEach(d => {
@@ -738,7 +747,6 @@
             apexHeatmap.render();
         }
 
-        // ---------- GRÁFICOS BASE (CHART.JS) ----------
         function renderGraficosChartJS(datos, formatter) {
             Chart.defaults.font.family = "'Inter', sans-serif";
             
@@ -763,11 +771,7 @@
                     maintainAspectRatio: false, 
                     plugins: { 
                         legend: { position: 'right' },
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => ` ${ctx.label}: ${formatter.format(ctx.raw)}`
-                            }
-                        }
+                        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${formatter.format(ctx.raw)}` } }
                     } 
                 }
             });
@@ -793,11 +797,7 @@
                     maintainAspectRatio: false, 
                     plugins: { 
                         legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => ` Monto: ${formatter.format(ctx.raw)}`
-                            }
-                        }
+                        tooltip: { callbacks: { label: ctx => ` Monto: ${formatter.format(ctx.raw)}` } }
                     },
                     scales: { 
                         y: { 
@@ -814,7 +814,6 @@
             });
         }
 
-        // ---------- GRAFO DE REDES (VIS.JS) CON TOOLTIPS HTML ----------
         function renderNetworkGraph(datos, formatter) {
             const container = document.getElementById('networkGraph');
             const edgesMap = {};
@@ -839,7 +838,6 @@
             const nodosCreados = new Set();
             const fuerzaColors = { "Ejército": "#059669", "Armada": "#d97706", "Fuerza Aérea": "#2563eb", "EMCO": "#8b5cf6" };
 
-            // Nodos Fuerzas Armadas
             Object.values(safMap).forEach(f => {
                 if (datos.some(d => (safMap[d.SAF] || `SAF ${d.SAF}`) === f)) {
                     nodos.add({
@@ -855,14 +853,11 @@
             let maxMontoLinea = 1; Object.values(edgesMap).forEach(monto => { if(monto > maxMontoLinea) maxMontoLinea = monto; });
             let maxMontoProv = 1; top15Prov.forEach(p => { if(provTotales[p] > maxMontoProv) maxMontoProv = provTotales[p]; });
 
-            // Nodos Proveedores y Vínculos
             Object.entries(edgesMap).forEach(([key, monto]) => {
                 const [fuerza, prov] = key.split('|');
                 if (top15Prov.includes(prov)) {
                     if (!nodosCreados.has(prov)) {
                         const nodeSize = 10 + ((provTotales[prov] / maxMontoProv) * 30);
-                        
-                        // Tooltip enriquecido para el nodo (sin etiquetas crudas)
                         const nodeTooltip = htmlTitle(`
                             <div style="font-weight:700; color:#0f172a; margin-bottom:2px;">${prov}</div>
                             <div style="color:#475569; font-size:11px;">Facturación total: <b style="color:#0f172a;">${formatter.format(provTotales[prov])}</b></div>
@@ -877,10 +872,7 @@
                         });
                         nodosCreados.add(prov);
                     }
-
                     const edgeWidth = 1 + ((monto / maxMontoLinea) * 9);
-                    
-                    // Tooltip enriquecido para la arista
                     const edgeTooltip = htmlTitle(`
                         <div style="font-size:11px; color:#334155;">
                             Vínculo con <b>${fuerza}</b>: <b style="color:#0f172a;">${formatter.format(monto)}</b>
