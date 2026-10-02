@@ -328,7 +328,7 @@
                 </div>
             </div>
             <div class="text-center text-slate-500 pt-2 flex flex-col items-center">
-                <span class="inline-block bg-slate-800 px-3 py-1 rounded-text-[10px] mb-2 font-mono">Arquitectura Client-Side • Privacy First</span>
+                <span class="inline-block bg-slate-800 px-3 py-1 rounded text-[10px] mb-2 font-mono">Arquitectura Client-Side • Privacy First</span>
                 Plataforma desarrollada para el certamen nacional de innovación y visualización <strong>Contar con Datos 2026</strong>.
             </div>
         </div>
@@ -354,7 +354,7 @@
             "2021": 95, "2022": 130, "2023": 350, "2024": 950, "2025": 1150, "2026": 1300
         };
 
-        // FUNCIÓN REPARADORA DE MOJIBAKE (Corrige tildes rotas UTF-8 / Windows-1252)
+        // FUNCIÓN REPARADORA DE MOJIBAKE
         function repararTexto(texto) {
             if (!texto || typeof texto !== 'string') return texto;
             if (!texto.includes('Ã') && !texto.includes('Â') && !texto.includes('â')) return texto.trim();
@@ -384,6 +384,17 @@
                 .trim();
         }
 
+        // FUNCIÓN GENERADORA DE TOOLTIP HTML PARA VIS.JS (Evita "b entre picos")
+        function htmlTitle(html) {
+            const container = document.createElement("div");
+            container.innerHTML = html;
+            container.style.fontFamily = "Inter, sans-serif";
+            container.style.fontSize = "12px";
+            container.style.lineHeight = "1.4";
+            container.style.padding = "2px 4px";
+            return container;
+        }
+
         // Lógica de Pestañas (Tabs)
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
@@ -397,7 +408,6 @@
             activeBtn.classList.remove('border-transparent', 'text-slate-500', 'font-medium');
             activeBtn.classList.add('border-blue-600', 'text-blue-600', 'font-bold');
 
-            // Forzar actualización de tamaño de los gráficos
             window.dispatchEvent(new Event('resize'));
             if(chartProcInst) chartProcInst.resize();
             if(chartFuerzasInst) chartFuerzasInst.resize();
@@ -540,7 +550,6 @@
                 (fProc === 'TODOS' || d.Procedimiento === fProc)
             );
 
-            // KPIs Volumen y Promedio
             const totalMonto = filtrados.reduce((a, b) => a + Number(b.Monto || 0), 0);
             const cantidad = filtrados.length;
             const promedio = cantidad > 0 ? (totalMonto / cantidad) : 0;
@@ -561,7 +570,6 @@
                     provFrecuencia[provName] = (provFrecuencia[provName] || 0) + 1;
                 }
                 
-                // Cálculo de Riesgo GDI
                 const procStr = (d.Procedimiento || '').toLowerCase();
                 if (procStr.includes('directa') || procStr.includes('privada') || procStr.includes('excepci')) {
                     montoDirectas += Number(d.Monto);
@@ -669,7 +677,6 @@
                 });
             }
 
-            // RENDERIZADO DE TODOS LOS COMPONENTES
             renderApexCharts(filtrados, monedaFormato);
             renderGraficosChartJS(filtrados, monedaFormato);
             renderNetworkGraph(filtrados, monedaFormato);
@@ -735,7 +742,6 @@
         function renderGraficosChartJS(datos, formatter) {
             Chart.defaults.font.family = "'Inter', sans-serif";
             
-            // 1. Fondos por Fuerza (Pie Chart)
             const fuerzasTotales = {};
             datos.forEach(d => {
                 const f = safMap[d.SAF] || 'Otros';
@@ -766,7 +772,6 @@
                 }
             });
 
-            // 2. Procedimientos (Bar Chart)
             const procTotales = {};
             datos.forEach(d => { 
                 const proc = d.Procedimiento || 'N/A';
@@ -809,7 +814,7 @@
             });
         }
 
-        // ---------- GRAFO DE REDES (VIS.JS) ----------
+        // ---------- GRAFO DE REDES (VIS.JS) CON TOOLTIPS HTML ----------
         function renderNetworkGraph(datos, formatter) {
             const container = document.getElementById('networkGraph');
             const edgesMap = {};
@@ -834,12 +839,14 @@
             const nodosCreados = new Set();
             const fuerzaColors = { "Ejército": "#059669", "Armada": "#d97706", "Fuerza Aérea": "#2563eb", "EMCO": "#8b5cf6" };
 
+            // Nodos Fuerzas Armadas
             Object.values(safMap).forEach(f => {
                 if (datos.some(d => (safMap[d.SAF] || `SAF ${d.SAF}`) === f)) {
                     nodos.add({
                         id: f, label: f, shape: 'dot', size: 30, 
                         color: { background: fuerzaColors[f] || '#64748b', border: '#ffffff' },
-                        font: { color: '#1e293b', face: 'Inter', bold: true }
+                        font: { color: '#1e293b', face: 'Inter', bold: true },
+                        title: htmlTitle(`<strong>Organismo:</strong> ${f}`)
                     });
                     nodosCreados.add(f);
                 }
@@ -848,24 +855,41 @@
             let maxMontoLinea = 1; Object.values(edgesMap).forEach(monto => { if(monto > maxMontoLinea) maxMontoLinea = monto; });
             let maxMontoProv = 1; top15Prov.forEach(p => { if(provTotales[p] > maxMontoProv) maxMontoProv = provTotales[p]; });
 
+            // Nodos Proveedores y Vínculos
             Object.entries(edgesMap).forEach(([key, monto]) => {
                 const [fuerza, prov] = key.split('|');
                 if (top15Prov.includes(prov)) {
                     if (!nodosCreados.has(prov)) {
                         const nodeSize = 10 + ((provTotales[prov] / maxMontoProv) * 30);
+                        
+                        // Tooltip enriquecido para el nodo (sin etiquetas crudas)
+                        const nodeTooltip = htmlTitle(`
+                            <div style="font-weight:700; color:#0f172a; margin-bottom:2px;">${prov}</div>
+                            <div style="color:#475569; font-size:11px;">Facturación total: <b style="color:#0f172a;">${formatter.format(provTotales[prov])}</b></div>
+                        `);
+
                         nodos.add({
                             id: prov, label: prov.substring(0, 20), 
-                            title: `<b>${prov}</b><br>Facturación: ${formatter.format(provTotales[prov])}`,
+                            title: nodeTooltip,
                             shape: 'dot', size: nodeSize, 
                             color: { background: '#cbd5e1', border: '#94a3b8' },
                             font: { size: 12, color: '#475569', face: 'Inter' }
                         });
                         nodosCreados.add(prov);
                     }
+
                     const edgeWidth = 1 + ((monto / maxMontoLinea) * 9);
+                    
+                    // Tooltip enriquecido para la arista
+                    const edgeTooltip = htmlTitle(`
+                        <div style="font-size:11px; color:#334155;">
+                            Vínculo con <b>${fuerza}</b>: <b style="color:#0f172a;">${formatter.format(monto)}</b>
+                        </div>
+                    `);
+
                     aristas.add({
                         from: fuerza, to: prov, value: edgeWidth,
-                        title: `Monto adjudicado: ${formatter.format(monto)}`,
+                        title: edgeTooltip,
                         color: { color: '#e2e8f0', hover: '#94a3b8', opacity: 0.8 }
                     });
                 }
